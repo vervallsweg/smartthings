@@ -16,104 +16,12 @@
 import org.json.JSONObject
 
 preferences {
-    /*input("preferencesApiHost", "string", title:"API host address",
-        required:true, displayDuringSetup:true)
-    input("preferencesDeviceAddress", "string", title:"Google Cast device address",
-        required:true, displayDuringSetup:true)
-  	input("preferencesDeviceType", "enum", title: "Google Cast device type",
-    	required: false, displayDuringSetup:true, multiple:false, value: "Video", defaultValue: "Video", options: ["Audio","Video"])
-  	input("preferencesPollMinutes", "enum", title: "Poll device every x minutes",
-    	required: false, multiple:false, value: "preferencesPollMinutes", default: "1", options: ["1","2","3","4","5","10"])
-   	input("preferencesPollSecond", "number", title:"Poll device on every x second",
-        required:false, displayDuringSetup:false)*/
    	input("configOn", "enum", title: "Switch on does?",
     	required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
   	input("configNext", "enum", title: "Next song does?",
     	required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
   	input("configPrev", "enum", title: "Previous song does?",
     	required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-  	
-    /*input("presetObject", "string", title:"Preset object", defaultValue: "TEST",
-        required:false)*/
-    
-    //PRESET1
-   	/*input("preset1MediaTitle", "string", title:"Preset 1 media title", defaultValue: "Preset 1",
-        required:false)
-  	input("preset1MediaSubtitle", "string", title:"Preset 1 media subtitle",
-        required:false)
-   	input("preset1MediaType", "enum", title: "Preset 1 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset1MediaUrl", "string", title:"Preset 1 media url",
-        required:false)
-  	input("preset1StreamType", "enum", title: "Preset 1 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset1MediaImageUrl", "string", title:"Preset 1 media image url",
-        required:false)
-   	//PRESET2
-   	input("preset2MediaTitle", "string", title:"Preset 2 media title",
-        required:false)
-  	input("preset2MediaSubtitle", "string", title:"Preset 2 media subtitle",
-        required:false)
-   	input("preset2MediaType", "enum", title: "Preset 2 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset2MediaUrl", "string", title:"Preset 2 media url",
-        required:false)
-  	input("preset2StreamType", "enum", title: "Preset 2 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset2MediaImageUrl", "string", title:"Preset 2 media image url",
-        required:false)
-  	//PRESET3
-   	input("preset3MediaTitle", "string", title:"Preset 3 media title",
-        required:false)
-  	input("preset3MediaSubtitle", "string", title:"Preset 3 media subtitle",
-        required:false)
-   	input("preset3MediaType", "enum", title: "Preset 3 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset3MediaUrl", "string", title:"Preset 3 media url",
-        required:false)
-  	input("preset3StreamType", "enum", title: "Preset 3 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset3MediaImageUrl", "string", title:"Preset 3 media image url",
-        required:false)
-   	//PRESET4
-   	input("preset4MediaTitle", "string", title:"Preset 4 media title",
-        required:false)
-  	input("preset4MediaSubtitle", "string", title:"Preset 4 media subtitle",
-        required:false)
-   	input("preset4MediaType", "enum", title: "Preset 4 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset4MediaUrl", "string", title:"Preset 4 media url",
-        required:false)
-  	input("preset4StreamType", "enum", title: "Preset 4 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset4MediaImageUrl", "string", title:"Preset 4 media image url",
-        required:false)
-    //PRESET5
-   	input("preset5MediaTitle", "string", title:"Preset 5 media title",
-        required:false)
-  	input("preset5MediaSubtitle", "string", title:"Preset 5 media subtitle",
-        required:false)
-   	input("preset5MediaType", "enum", title: "Preset 5 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset5MediaUrl", "string", title:"Preset 5 media url",
-        required:false)
-  	input("preset5StreamType", "enum", title: "Preset 5 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset5MediaImageUrl", "string", title:"Preset 5 media image url",
-        required:false)
-  	//PRESET6
-   	input("preset6MediaTitle", "string", title:"Preset 6 media title",
-        required:false)
-  	input("preset6MediaSubtitle", "string", title:"Preset 6 media subtitle",
-        required:false)
-   	input("preset6MediaType", "enum", title: "Preset 6 media type",
-    	required: false, multiple:false, value: "audio/mp3", options: ["audio/mp3","video/mp4"])
-    input("preset6MediaUrl", "string", title:"Preset 6 media url",
-        required:false)
-  	input("preset6StreamType", "enum", title: "Preset 6 stream type",
-    	required: false, multiple:false, value: "LIVE", options: ["LIVE","BUFFERED"])
-   	input("preset6MediaImageUrl", "string", title:"Preset 6 media image url",
-        required:false)*/
 }
  
 metadata {
@@ -124,7 +32,7 @@ metadata {
         capability "Speech Synthesis"
         capability "Refresh"
         capability "Polling"
-        //capability "Health Check" //TODO
+        //capability "Health Check" //TODO: Implement health check
         command "restartPolling"
         command "updateAttributesMedia"
         command "playPreset", ["number"]
@@ -251,7 +159,7 @@ metadata {
 // Device handler states
 
 def installed() {
-    log.debug "Executing 'installed'"
+    //log.debug "Executing 'installed'"
 	setDefaultAttributes()
     
     //Poll settings
@@ -267,7 +175,7 @@ def installed() {
 }
 
 def updated() {
-	log.debug "Executing 'updated'"
+	//log.debug "Executing 'updated'"
     
     setDefaultPresets()
     restartPolling()
@@ -279,11 +187,11 @@ def refresh() {
 
 def poll() {
 	if(state.badResponseCounter>4) {
-    	log.error "badResponseCounter>4"
+    	//log.error "badResponseCounter>4"
     	return stopPolling()
     }
     if(device.currentValue("trackDataTitle")=="Group playback") {
-    	log.debug("'trackDataTitle' == Group playback")
+    	//log.debug("'trackDataTitle' == Group playback")
         return stopPolling()
     } else {
     	return refresh()
@@ -291,7 +199,7 @@ def poll() {
 }
 
 def startPolling() {
-	log.debug "startPolling"
+	//log.debug "startPolling"
 	
     poll()
 
@@ -300,24 +208,24 @@ def startPolling() {
     def minutes = getDataValue('pollMinutes')
     def sched = "${seconds} 0/${minutes} * * * ?"
 
-    log.debug "Scheduling polling task with \"${sched}\""
+    //log.debug "Scheduling polling task with \"${sched}\""
     schedule(sched, poll)
 }
 
 def stopPolling() {
-	log.debug "stopPolling"
+	//log.debug "stopPolling"
 	unschedule()
 }
 
 def restartPolling() {
-	log.debug "restartPolling"
+	//log.debug "restartPolling"
     stopPolling()
     startPolling()
 }
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+	//log.debug "Parsing '${description}'"
     
     def msg, json, status
     try {
@@ -325,7 +233,7 @@ def parse(String description) {
        	status = msg.status
     	json = msg.json
     } catch (e) {
-    	log.warning "Exception caught while parsing data: "+e
+    	//log.warning "Exception caught while parsing data: "+e
         setDefaultAttributes()
         return null;
     }
@@ -333,21 +241,21 @@ def parse(String description) {
     if(status==200){
     	state.badResponseCounter=0
     	if(json.type=="RECEIVER_STATUS"){
-        	log.debug "Received RECEIVER_STATUS"
+        	//log.debug "Received RECEIVER_STATUS"
         	updateAttributesDevice(json.status)
         }
         if(json.type=="MEDIA_STATUS"){
-        	log.debug "Received MEDIA_STATUS"
+        	//log.debug "Received MEDIA_STATUS"
         	updateAttributesMedia(json.status)
             if(device.currentValue("lastPresetPlayed")!=null) {
-            	log.warn "last preset played: " + device.currentValue("lastPresetPlayed")
+            	//log.warn "last preset played: " + device.currentValue("lastPresetPlayed")
                 getDeviceStatus()
                 sendEvent(name: "lastPresetPlayed", value: null)
             }
             
         }
     } else {
-    	log.error "HTTP response not ok, status code: " + status + " requestId: " + msg.requestId;
+    	//log.error "HTTP response not ok, status code: " + status + " requestId: " + msg.requestId;
         state.badResponseCounter++
         setDefaultAttributes()
     }
@@ -355,127 +263,91 @@ def parse(String description) {
 
 // handle commands
 def play() {
-	log.debug "Executing 'play'"
+	//log.debug "Executing 'play'"
     if(device.currentValue("deviceSessionId")!=null&&device.currentValue("deviceMediaSessionId")!=null){
     	setMediaPlaybackPlay(device.currentValue("deviceSessionId"), device.currentValue("deviceMediaSessionId"))
     }
 }
 
 def pause() {
-	log.debug "Executing 'pause'"
+	//log.debug "Executing 'pause'"
     if(device.currentValue("deviceSessionId")!=null&&device.currentValue("deviceMediaSessionId")!=null){
 		setMediaPlaybackPause(device.currentValue("deviceSessionId"), device.currentValue("deviceMediaSessionId"))
    	}
 }
 
 def stop() {
-	log.debug "Executing 'stop'"
+	//log.debug "Executing 'stop'"
     if(device.currentValue("deviceSessionId")!=null){
 		setDevicePlaybackStop(device.currentValue("deviceSessionId"))
    	} else {
-    	log.debug "No deviceSessionId"
+    	//log.debug "No deviceSessionId"
     }
 }
 
 def nextTrack() {
-	log.debug "Executing 'nextTrack' encode: "
+	//log.debug "Executing 'nextTrack' encode: "
 	selectableAction(settings.configNext)
 }
 
 def previousTrack() {
-	log.debug "Executing 'previousTrack'"
+	//log.debug "Executing 'previousTrack'"
 	selectableAction(settings.configPrev)
 }
 
 def playTrack(trackToPlay) {
-	log.debug "Executing 'playTrack': "
+	//log.debug "Executing 'playTrack': "
 	// TODO: handle 'playTrack' command
     setMediaPlayback('audio/mp3', trackToPlay, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
 def setLevel(level) {
-	log.debug "Executing 'setLevel'"
+	//log.debug "Executing 'setLevel'"
     double lvl = (double) level;
 	setDeviceVolume(lvl)
 }
 
 def mute() {
-	log.debug "Executing 'mute'"
+	//log.debug "Executing 'mute'"
 	setDeviceMuted(true)
 }
 
 def unmute() {
-	log.debug "Executing 'unmute'"
+	//log.debug "Executing 'unmute'"
 	setDeviceMuted(false)
 }
 
 def setTrack() {
-	log.debug "Executing 'setTrack'"
+	//log.debug "Executing 'setTrack'"
 	// TODO: handle 'setTrack' command
 }
 
 def resumeTrack() {
-	log.debug "Executing 'resumeTrack'"
+	//log.debug "Executing 'resumeTrack'"
 	// TODO: handle 'resumeTrack' command
 }
 
 def restoreTrack() {
-	log.debug "Executing 'restoreTrack'"
+	//log.debug "Executing 'restoreTrack'"
 	// TODO: handle 'restoreTrack' command
 }
 
 def setDefaultPresets() {
-	/*if (settings.preset1MediaTitle) {
-	  	sendEvent(name: "preset1Name", value: settings.preset1MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset1Name", value: "Preset 1", displayed: false)
-   		log.info "preset1Name not set"
-    }
-    if (settings.preset2MediaTitle) {
-	  	sendEvent(name: "preset2Name", value: settings.preset2MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset2Name", value: "Preset 2", displayed: false)
-   		log.info "preset2Name not set"
-    }
-    if (settings.preset3MediaTitle) {
-	  	sendEvent(name: "preset3Name", value: settings.preset3MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset3Name", value: "Preset 3", displayed: false)
-   		log.info "preset3Name not set"
-    }
-    if (settings.preset4MediaTitle) {
-	  	sendEvent(name: "preset4Name", value: settings.preset4MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset4Name", value: "Preset 4", displayed: false)
-   		log.info "preset4Name not set"
-    }
-    if (settings.preset5MediaTitle) {
-	  	sendEvent(name: "preset5Name", value: settings.preset5MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset5Name", value: "Preset 5", displayed: false)
-   		log.info "preset5Name not set"
-    }
-    if (settings.preset6MediaTitle) {
-	  	sendEvent(name: "preset6Name", value: settings.preset6MediaTitle, displayed: false)
-   	} else {
-    	sendEvent(name: "preset6Name", value: "Preset 6", displayed: false)
-   		log.info "preset6Name not set"
-    }*/
     def p1 = "Preset 1", p2 = "Preset 2", p3 = "Preset 3", p4 = "Preset 4", p5 = "Preset 5", p6 = "Preset 6", presets
     if(getDataValue("presetObject")) {
         try {
         	presets = parseJson(getDataValue("presetObject"))
         } catch (Exception e) {
-        	log.debug "Cannot parse JSON: " + e
+        	//log.debug "Cannot parse JSON: " + e
             setDefaultPresetObject()
         }
         
-        try{p1=presets.preset1.mediaTitle}catch(Exception e){log.debug "Preset 1 not set"}
-        try{p2=presets.preset2.mediaTitle}catch(Exception e){log.debug "Preset 2 not set"}
-        try{p3=presets.preset3.mediaTitle}catch(Exception e){log.debug "Preset 3 not set"}
-        try{p4=presets.preset4.mediaTitle}catch(Exception e){log.debug "Preset 4 not set"}
-        try{p5=presets.preset5.mediaTitle}catch(Exception e){log.debug "Preset 5 not set"}
-        try{p6=presets.preset6.mediaTitle}catch(Exception e){log.debug "Preset 6 not set"}
+        try{p1=presets.preset1.mediaTitle}catch(Exception e){/*log.debug "Preset 1 not set"*/}
+        try{p2=presets.preset2.mediaTitle}catch(Exception e){/*log.debug "Preset 2 not set"*/}
+        try{p3=presets.preset3.mediaTitle}catch(Exception e){/*log.debug "Preset 3 not set"*/}
+        try{p4=presets.preset4.mediaTitle}catch(Exception e){/*log.debug "Preset 4 not set"*/}
+        try{p5=presets.preset5.mediaTitle}catch(Exception e){/*log.debug "Preset 5 not set"*/}
+        try{p6=presets.preset6.mediaTitle}catch(Exception e){/*log.debug "Preset 6 not set"*/}
         
     } else {
     	setDefaultPresetObject()
@@ -486,53 +358,17 @@ def setDefaultPresets() {
    	sendEvent(name: "preset4Name", value: p4, displayed: false)
   	sendEvent(name: "preset5Name", value: p5, displayed: false)
    	sendEvent(name: "preset6Name", value: p6, displayed: false)
-    /*log.warn "Writing settings"
-    settings.presetObject = ""+getDataValue("presetObject")
-    device.updateSetting("presetObject", "test")
-    //typeSetting("presetObject", "test")
-    log.warn "Settings written"*/
 }
 
 def setDefaultPresetObject() {
 	def defaultObject = '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}'
-	log.debug "DO: " + defaultObject
+	//log.debug "DO: " + defaultObject
     updateDataValue("presetObject", defaultObject)
 }
 
 def playPreset(number) {
-	log.debug "Executing 'playPreset': "+number
+	//log.debug "Executing 'playPreset': "+number
     sendEvent(name: "lastPresetPlayed", value: number)
-    
-    /*if(number==1) {
-    	if(device.currentValue("preset1Name") != "Preset 1") {
-    		setMediaPlayback(settings.preset1MediaType, settings.preset1MediaUrl, settings.preset1MediaStreamType, settings.preset1MediaTitle, settings.preset1MediaSubtitle, settings.preset1MediaImageUrl)
-    	}
-    }
-    if(number==2) {
-    	if(device.currentValue("preset2Name") != "Preset 2") {
-    		setMediaPlayback(settings.preset2MediaType, settings.preset2MediaUrl, settings.preset2MediaStreamType, settings.preset2MediaTitle, settings.preset2MediaSubtitle, settings.preset2MediaImageUrl)
-    	}
-    }
-    if(number==3) {
-    	if(device.currentValue("preset3Name") != "Preset 3") {
-    		setMediaPlayback(settings.preset3MediaType, settings.preset3MediaUrl, settings.preset3MediaStreamType, settings.preset3MediaTitle, settings.preset3MediaSubtitle, settings.preset3MediaImageUrl)
-    	}
-    }
-    if(number==4) {
-    	if(device.currentValue("preset4Name") != "Preset 4") {
-    		setMediaPlayback(settings.preset4MediaType, settings.preset4MediaUrl, settings.preset4MediaStreamType, settings.preset4MediaTitle, settings.preset4MediaSubtitle, settings.preset4MediaImageUrl)
-    	}
-    }
-    if(number==5) {
-    	if(device.currentValue("preset5Name") != "Preset 5") {
-    		setMediaPlayback(settings.preset5MediaType, settings.preset5MediaUrl, settings.preset5MediaStreamType, settings.preset5MediaTitle, settings.preset5MediaSubtitle, settings.preset5MediaImageUrl)
-    	}
-    }
-    if(number==6) {
-    	if(device.currentValue("preset6Name") != "Preset 6") {
-    		setMediaPlayback(settings.preset6MediaType, settings.preset6MediaUrl, settings.preset6MediaStreamType, settings.preset6MediaTitle, settings.preset6MediaSubtitle, settings.preset6MediaImageUrl)
-    	}
-    }*/
     
     def presets, preset, mediaType, mediaUrl, streamType, mediaTitle, mediaSubtitle, mediaImageUrl
     try {
@@ -553,47 +389,47 @@ def playPreset(number) {
         	setMediaPlayback(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl)
         }
     } catch (Exception e) {
-    	log.debug "Couldn't play preset: " + e
+    	//log.debug "Couldn't play preset: " + e
     }
 }
 
 def preset1() {
-	log.debug "Executing 'preset1'"
+	//log.debug "Executing 'preset1'"
     playPreset(1)
 }
 
 def preset2() {
-	log.debug "Executing 'preset2': "
+	//log.debug "Executing 'preset2': "
     playPreset(2)
 }
 
 def preset3() {
-	log.debug "Executing 'preset3': "
+	//log.debug "Executing 'preset3': "
 	playPreset(3)    
 }
 
 def preset4() {
-	log.debug "Executing 'preset4': "
+	//log.debug "Executing 'preset4': "
     playPreset(4)
 }
 
 def preset5() {
-	log.debug "Executing 'preset5': "
+	//log.debug "Executing 'preset5': "
     playPreset(5)
 }
 
 def preset6() {
-	log.debug "Executing 'preset6': "
+	//log.debug "Executing 'preset6': "
     playPreset(6)
 }
 
 def on() {
-	log.debug "Executing 'on'"
+	//log.debug "Executing 'on'"
     selectableAction(settings.configOn)
 }
 
 def off() {
-	log.debug "Executing 'off'"
+	//log.debug "Executing 'off'"
     stop()
 }
 
@@ -602,55 +438,43 @@ def speak(phrase) {
     return playTrack(sound.uri)
 }
 
-/*def subscribe() {log.info "Subscribe"}
-def getVolume() {log.info "getVolume"; return device.currentValue("level");}
-def getCurrentMedia() {log.info "getCurrentMedia"}
-def getCurrentStatus() {log.info "getCurrentStatus"}
-def seek() {log.info "seek"}
-def unsubscribe() {log.info "unsubscribe"}
-def setLocalLeve(number) {log.info "setLocalLeve"}
-def tileSetLevel(number) {log.info "tileSetLevel"}*/
 def playTrackAtVolume(String, number) {
-	log.info "playTrackAtVolume" + String;
+	//log.info "playTrackAtVolume" + String;
 	def url = "" + String;
     if(number!=null) { setLevel(number); }
     playTrack(String);
 }
-def playTrackAndResume(String, number1, number2) {log.info "playTrackAndResume"; playTrackAtVolume(String, number2)}
-//def playTextAndResume(String, number) {log.info "playTextAndResume"; playTrackAtVolume(String, number)}
-def playTrackAndRestore(String, number1, number2) {log.info "playTrackAndRestore"; playTrackAtVolume(String, number2)}
-/*def playTextAndRestore(String, number) {log.info "playTextAndRestore"; playTrackAtVolume(String, number)}
-def playSoundAndTrack(String, number1, json_object, number2) {log.info "playSoundAndTrack"; playTrackAtVolume(String, number1)}
-def playTextAndResume(String, json_object, number) {log.info "playTextAndResume"; playTrackAtVolume(String, number)}*/
+def playTrackAndResume(String, number1, number2) {/*log.info "playTrackAndResume"; playTrackAtVolume(String, number2)*/}
+def playTrackAndRestore(String, number1, number2) {/*log.info "playTrackAndRestore"; playTrackAtVolume(String, number2)*/}
 
 // HANDLE ATTRIBUTES
 def updateAttributesDevice(deviceStatus) {
-	log.debug "Executing 'updateAttributesDevice'"
+	//log.debug "Executing 'updateAttributesDevice'"
     
     if(deviceStatus.volume.level) {
-    	log.debug "deviceStatus.volume.level: "+(Math.round(deviceStatus.volume.level*100))
+    	//log.debug "deviceStatus.volume.level: "+(Math.round(deviceStatus.volume.level*100))
         sendEvent(name: "level", value: Math.round(deviceStatus.volume.level*100), unit: "%")
     }
     if(deviceStatus.volume.muted) {
-    	log.debug "deviceStatus.volume.muted: "+deviceStatus.volume.muted
+    	//log.debug "deviceStatus.volume.muted: "+deviceStatus.volume.muted
         sendEvent(name: "mute", value: "muted")
     } else {
-    	log.debug "deviceStatus.volume.muted: "+deviceStatus.volume.muted
+    	//log.debug "deviceStatus.volume.muted: "+deviceStatus.volume.muted
         sendEvent(name: "mute", value: "unmuted")
     }
     try {
     	if(deviceStatus.applications.displayName.get(0)!="Backdrop"&&getDataValue("deviceType")!="Video") {
-            log.debug "Receiver has sessionId: "+deviceStatus.applications.sessionId.get(0)
+            //log.debug "Receiver has sessionId: "+deviceStatus.applications.sessionId.get(0)
             sendEvent(name: "deviceSessionId", value: deviceStatus.applications.sessionId.get(0), displayed: false)
 
-            log.debug "Receiver application running, displayName: "+deviceStatus.applications.displayName.get(0)
+            //log.debug "Receiver application running, displayName: "+deviceStatus.applications.displayName.get(0)
             sendEvent(name: "deviceApplicationDisplayName", value: deviceStatus.applications.displayName.get(0), displayed: false)
             getMediaStatus(deviceStatus.applications.sessionId.get(0))
      	} else {
             throw new NullPointerException() //Btw. check the logs, such ironic expection caught :D
         }
     } catch (e) {
-    	log.debug "No application running, exception: "+e
+    	//log.debug "No application running, exception: "+e
         sendEvent(name: "status", value: "Ready to cast")
         sendEvent(name: "switch", value: off)
         sendEvent(name: "playpause", value: "pause", displayed: false)
@@ -659,11 +483,11 @@ def updateAttributesDevice(deviceStatus) {
 }
 
 def updateAttributesMedia(mediaStatus) {
-	log.debug "Executing 'updateAttributesMedia'"
-    log.trace "mediaStatus: "+mediaStatus
+	//log.debug "Executing 'updateAttributesMedia'"
+    //log.trace "mediaStatus: "+mediaStatus
     
     if(mediaStatus.playerState) {
-    	log.debug "mediaStatus.playerState: "+mediaStatus.playerState.get(0).toLowerCase()
+    	//log.debug "mediaStatus.playerState: "+mediaStatus.playerState.get(0).toLowerCase()
       	sendEvent(name: "status", value: mediaStatus.playerState.get(0).toLowerCase(), changed: true)
         if(mediaStatus.playerState.get(0).toLowerCase()=="playing") {
         	sendEvent(name: "playpause", value: "play", displayed: false)
@@ -674,7 +498,7 @@ def updateAttributesMedia(mediaStatus) {
             sendEvent(name: "switch", value: off)
         }
     } else {
-    	log.debug "mediaStatus.playerState not set, probably group playback"
+    	//log.debug "mediaStatus.playerState not set, probably group playback"
         sendEvent(name: "status", value: "group");
         sendEvent(name: "switch", value: on)
         sendEvent(name: "playpause", value: "play", displayed: false)
@@ -683,39 +507,39 @@ def updateAttributesMedia(mediaStatus) {
     if(mediaStatus.media) {
         if(mediaStatus.media.metadata.metadataType) { //OR IS PART OF GROUP PLAYBACK
             if(mediaStatus.media.metadata.metadataType.get(0)==3||mediaStatus.media.metadata.metadataType.get(0)==0) {
-                log.debug "mediaStatus.media.metadata.metadataType is MusicTrackMediaMetadata"
+                //log.debug "mediaStatus.media.metadata.metadataType is MusicTrackMediaMetadata"
                 JSONObject jsonO = new JSONObject(mediaStatus.media.metadata.get(0))
                 sendEvent(name: "trackData", value: jsonO, displayed:false)
                 updateAttributesTrack()
             }
         } 
    	} else {
-        log.debug "mediaStatus.media not set, probably group playback"
+        //log.debug "mediaStatus.media not set, probably group playback"
         sendEvent(name: "trackData", value: ('{ "title": "Group playback" }'), displayed: false)
         updateAttributesTrack()
     }
     
     if(mediaStatus.mediaSessionId){
-    	log.debug "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId.get(0)
+    	//log.debug "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId.get(0)
     	sendEvent(name: "deviceMediaSessionId", value: mediaStatus.mediaSessionId.get(0), displayed: false)
     } else {
-    	log.debug "mediaStatus.mediaSessionId not set, probably group playback"
+    	//log.debug "mediaStatus.mediaSessionId not set, probably group playback"
     	sendEvent(name: "deviceMediaSessionId", value: null, displayed: false)
     }
 }
 
 def updateAttributesTrack() {
-	log.debug "Executing 'updateAttributesTrack'"
+	//log.debug "Executing 'updateAttributesTrack'"
     JSONObject jO = new JSONObject(device.currentValue("trackData"))
     
     if(jO.has("albumName")) {
     	if(device.currentValue("trackDataAlbumName")!=jO.getString("albumName")){
-     		log.debug 'jO.getString("albumName"): ' +jO.getString("albumName")
+     		//log.debug 'jO.getString("albumName"): ' +jO.getString("albumName")
             sendEvent(name: "trackDataAlbumName", value: jO.getString("albumName"), displayed:false)
         }
     } else if(jO.has("subtitle")) {
     	if(device.currentValue("trackDataAlbumName")!=jO.getString("subtitle")){
-     		log.debug 'jO.getString("subtitle"): ' +jO.getString("subtitle")
+     		//log.debug 'jO.getString("subtitle"): ' +jO.getString("subtitle")
             sendEvent(name: "trackDataAlbumName", value: jO.getString("subtitle"), displayed:false)
         }
     } else {
@@ -723,7 +547,7 @@ def updateAttributesTrack() {
     }
     if(jO.has("title")) {
     	if(device.currentValue("trackDataTitle")!=jO.getString("title")){
-     		log.debug 'jO.getString("title"): ' +jO.getString("title")
+     		//log.debug 'jO.getString("title"): ' +jO.getString("title")
             sendEvent(name: "trackDataTitle", value: jO.getString("title"), displayed:false)
         }
     } else {
@@ -731,7 +555,7 @@ def updateAttributesTrack() {
     }
     if(jO.has("artist")) {
     	if(device.currentValue("trackDataArtist")!=jO.getString("artist")){
-     		log.debug 'jO.getString("artist"): ' +jO.getString("artist")
+     		//log.debug 'jO.getString("artist"): ' +jO.getString("artist")
             sendEvent(name: "trackDataArtist", value: jO.getString("artist"), displayed:false)
         }
     } else {
@@ -739,28 +563,25 @@ def updateAttributesTrack() {
     }
     
     if(device.currentValue("trackDataTitle")){
-    	log.debug "mediaStatus.media.metadata.title: "+device.currentValue("trackDataTitle")
+    	//log.debug "mediaStatus.media.metadata.title: "+device.currentValue("trackDataTitle")
         def trackDescription = device.currentValue("deviceApplicationDisplayName") +"\n"+ device.currentValue("trackDataTitle")
         
         if(device.currentValue("trackDataAlbumName")!="--") {
         	trackDescription = trackDescription +"\n"+ device.currentValue("trackDataAlbumName")
         }
-        /*if(device.currentValue("trackDataAlbumArtist")!="--") {
-        	trackDescription = trackDescription +"\n"+ device.currentValue("trackDataAlbumArtist")
-        }*/
         sendEvent(name: "trackDescription", value: trackDescription, displayed:false)
     }
 }
 
 // SET DEFAULT ATTRIBUTES
 def setDefaultAttributes() {
-	log.debug "Executing 'setDefaultAttributes'"
+	////log.debug "Executing 'setDefaultAttributes'"
     setDefaultAttributesDevice()
     setDefaultAttributesMedia()
 }
 
 def setDefaultAttributesDevice() {
-	log.debug "Executing 'setDefaultAttributesDevice'"
+	////log.debug "Executing 'setDefaultAttributesDevice'"
    
     sendEvent(name: "level", value: 0)
     sendEvent(name: "mute", value: true)
@@ -770,7 +591,7 @@ def setDefaultAttributesDevice() {
 }
 
 def setDefaultAttributesMedia() {
-	log.debug "Executing 'setDefaultAttributesMedia'"
+	//log.debug "Executing 'setDefaultAttributesMedia'"
     
     sendEvent(name: "trackDescription", value: "Nothing playing \n Ready to cast", displayed: false)
     sendEvent(name: "deviceMediaSessionId", value: null, displayed: false)
@@ -783,49 +604,49 @@ def setDefaultAttributesMedia() {
 
 // GOOGLE CAST
 def getDeviceStatus() {
-	log.debug "Executing 'getDeviceStatus'"
+	//log.debug "Executing 'getDeviceStatus'"
     sendEvent(name: "getDeviceStatus", value: new Date(), displayed: false)
 	sendHttpRequest(getDataValue('apiHost'), '/getDeviceStatus?address='+getDataValue('deviceAddress'))
 }
 
 def getMediaStatus(sessionId) {
-	log.debug "Executing 'getMediaStatus' sessionId: "+sessionId
+	//log.debug "Executing 'getMediaStatus' sessionId: "+sessionId
 	sendHttpRequest(getDataValue('apiHost'), '/getMediaStatus?address='+getDataValue('deviceAddress')+'&sessionId='+sessionId)
 }
 
 def setDeviceVolume(double volume) {
-	log.debug "Executing 'setDeviceVolume' volume: "+(volume/100)
+	//log.debug "Executing 'setDeviceVolume' volume: "+(volume/100)
     sendHttpRequest(getDataValue('apiHost'), '/setDeviceVolume?address='+getDataValue('deviceAddress')+'&volume='+(volume/100))
 }
 
 def setDeviceMuted(boolean muted) {
-	log.debug "Executing 'setDeviceMuted' muted: "+muted
+	//log.debug "Executing 'setDeviceMuted' muted: "+muted
     sendHttpRequest(getDataValue('apiHost'), '/setDeviceMuted?address='+getDataValue('deviceAddress')+'&muted='+muted)
 }
 
 def setMediaPlaybackPlay(sessionId, mediaSessionId) {
-	log.debug "Executing 'setMediaPlaybackPlay'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
+	//log.debug "Executing 'setMediaPlaybackPlay'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
     sendHttpRequest(getDataValue('apiHost'), '/setMediaPlaybackPlay?address='+getDataValue('deviceAddress')+'&sessionId='+sessionId+'&mediaSessionId='+mediaSessionId)
 }
 
 def setMediaPlaybackPause(sessionId, mediaSessionId) {
-	log.debug "Executing 'setMediaPlaybackPause'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
+	//log.debug "Executing 'setMediaPlaybackPause'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
     sendHttpRequest(getDataValue('apiHost'), '/setMediaPlaybackPause?address='+getDataValue('deviceAddress')+'&sessionId='+sessionId+'&mediaSessionId='+mediaSessionId)
 }
 
 def setDevicePlaybackStop(sessionId) {
-	log.debug "Executing 'setDevicePlaybackStop'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
+	//log.debug "Executing 'setDevicePlaybackStop'; sessionId: "+sessionId+" mediaSessionId: "+mediaSessionId
     sendHttpRequest(getDataValue('apiHost'), '/setDevicePlaybackStop?address='+getDataValue('deviceAddress')+'&sessionId='+sessionId)
 }
 
 def setMediaPlayback(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
-	log.debug "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl
+	//log.debug "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl
     sendHttpRequest(getDataValue('apiHost'), '/setMediaPlayback?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&mediaUrl='+mediaUrl+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
 }
 
 // NETWORKING STUFF
 def sendHttpRequest(String host, String path) {
-	log.debug "Executing 'sendHttpRequest' host: "+host+" path: "+path
+	//log.debug "Executing 'sendHttpRequest' host: "+host+" path: "+path
 	sendHubCommand(new physicalgraph.device.HubAction("""GET ${path} HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host, [callback: hubResponseReceived]))
 }
 
@@ -836,7 +657,7 @@ void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
 // PRESETS
 def getNewPresetObject(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
 	JSONObject jsO = new JSONObject('{ "mediaType":"'+mediaType+'", "mediaUrl":"'+mediaUrl+'", "mediaStreamType":"'+mediaStreamType+'", "mediaTitle":"'+mediaTitle+'", "mediaSubtitle":"'+mediaSubtitle+'", "mediaImageUrl":"'+mediaImageUrl+'" }')
-	log.error("JSO:" + jsO)
+	//log.error("JSO:" + jsO)
     return jsO
 }
 
@@ -844,7 +665,7 @@ def getNewPresetObject(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSu
 def getTimeStamp() {
 	Date now = new Date(); 
 	def timeStamp = (long)(now.getTime()/1000)
-   	log.info "Timestamp generated: "+timeStamp
+   	//log.info "Timestamp generated: "+timeStamp
     return timeStamp;
 }
 
@@ -884,7 +705,7 @@ def selectableAction(action) {
 
 //DEBUGGING
 def setDefaultDeviceValues() {
-	log.debug "Executing 'setDefaultDeviceValues'"
+	//log.debug "Executing 'setDefaultDeviceValues'"
 
     updateDataValue('apiHost', '192.168.86.177:3000')
     updateDataValue('deviceAddress', '192.168.86.32')
@@ -892,8 +713,8 @@ def setDefaultDeviceValues() {
 }
 
 def logDeviceValues() {
-	log.debug "Executing 'logDeviceValues'"
-    log.debug "apiHost: " + getDataValue('apiHost')
-    log.debug "deviceAddress: " + getDataValue('deviceAddress')
-    log.debug "deviceName: " + getDataValue('deviceName')
+	//log.debug "Executing 'logDeviceValues'"
+    //log.debug "apiHost: " + getDataValue('apiHost')
+    //log.debug "deviceAddress: " + getDataValue('deviceAddress')
+    //log.debug "deviceName: " + getDataValue('deviceName')
 }
