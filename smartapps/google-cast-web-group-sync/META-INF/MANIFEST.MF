@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Executable: smartapps/vervallsweg/google-cast-web-group-sync.src
+
+Name: google-cast-web-group-sync.groovy
+SHA1-Digest: 85859c0de7ad72497d65f579faa012d90de13f05
+
+Name: i18n/messages.properties
+SHA1-Digest: da39a3ee5e6b4b0d3255bfef95601890afd80709
