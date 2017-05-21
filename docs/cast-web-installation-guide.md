@@ -3,6 +3,7 @@
 - Device that runs node.js and static IP
 - Smartthings hub
 - Google Cast enabled device
+
 Due to the limitations of the Smartthings platform all Google Cast requests (SOCKETS) need to be proxied through an HTTP server. This web API is written for node.js and should be running on your local network. A cloud installation is probably somehow possible, but not recommended!
 ## Setting up the API
 Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.  

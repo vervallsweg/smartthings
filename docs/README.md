@@ -2,7 +2,7 @@
 ## Device type handlers
 ### [cast-web](https://github.com/vervallsweg/smartthings/tree/master/device-handlers/cast-web "cast-web")
 Device handler for all Google Cast enabled devices (audio/video/groups). Implements all Bose SoundTouch and most Sonos functions. Due to limitations of the Samsung Smartthings platform it requires an HTTP API on your local network. 
-[Installation Guide](https://vervallsweg.github.io/smartthings/cast-web-installation-guide.md "Installation Guide")
+[Installation Guide](https://vervallsweg.github.io/smartthings/cast-web-installation-guide "Installation Guide")
 ## Smartapps
 ### [google-cast-web-service-manager](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "google-cast-web-service-manager")
 Service manager for the cast-web dth. It let's you discover and add new devices, configure them, takes care of address changes and much more.
