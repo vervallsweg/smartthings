@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="cast-web-preset-generator/semantic-ui/semantic.min.css">
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 # cast-web installation guide
 ## Prerequisites
 - Device that runs node.js and static IP
@@ -8,7 +10,12 @@ Due to the limitations of the Smartthings platform all Google Cast requests (SOC
 ## Setting up the API
 Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.  
 ## Installing the DTH, service manager
-//Pictures comming soon.
+<div class="ui small images">
+  <img src="https://lorempixel.com/400/300">
+  <img src="https://lorempixel.com/400/300">
+  <img src="https://lorempixel.com/400/300">
+  <img src="https://lorempixel.com/400/300">
+</div>
 First copy the device the device type handler's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/device-handlers/cast-web "here"). Open the Smartthings IDE, log in > 'My Device Handlers' > '+ Create New Device Handler' > 'From Code' > paste the code from clipboard > 'Create'.
 
 Second copy the service manager's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "here"). Open the IDE > 'My SmartApps' > 'New SmartApp' > 'From Code' > paste the code from clipboard > 'Create'.
