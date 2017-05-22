@@ -39,11 +39,17 @@ Repeat this step for all your other audio groups.
 
 If you press the play button next to a group sync instance, it will level the groups volume.
 
+<div class="ui modal basic">
+	<div class="image content">
+		<img class="image" src="'+imgUrl+'" id="modalImage">
+	</div>
+</div>
+
 <script type="text/javascript">
 	function showModal(imgUrl) {
-		var div = document.createElement("div");
-		div.class = 'ui modal basic';
-		div.innerHTML = '<div class="image content"><img class="image" src="'+imgUrl+'"></div>';
-		//document.body.append
+		document.getElementById('modalImage').src = imgUrl;
 	}
+	$('.ui.basic.modal')
+	  .modal('show')
+	;
 </script>
