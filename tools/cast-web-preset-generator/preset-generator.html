@@ -128,9 +128,6 @@
 	$('.ui.accordion')
 	 	.accordion()
 	;
-	$('.ui.dropdown')
-	  	.dropdown()
-	;
 	$('#copyToClipboard')
 	  .popup()
 	;
@@ -322,6 +319,10 @@
 			
 			presetAccordion.append(getPresetAccordionForm(presetObject['preset'+i], i));
 		}
+		
+		$('.ui.dropdown')
+		  	.dropdown()
+		;
 	}
 	
 	function getPresetAccordionForm(preset, presetNumber) {
