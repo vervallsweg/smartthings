@@ -41,7 +41,7 @@ If you press the play button next to a group sync instance, it will level the gr
 
 <div class="ui modal basic">
 	<div class="image content">
-		<img class="image" src="'+imgUrl+'" id="modalImage">
+		<img class="image" src="" id="modalImage">
 	</div>
 </div>
 
@@ -52,5 +52,4 @@ If you press the play button next to a group sync instance, it will level the gr
 		  .modal('show')
 		;
 	}
-
 </script>
