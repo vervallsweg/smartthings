@@ -704,14 +704,6 @@ def selectableAction(action) {
 }
 
 //DEBUGGING
-def setDefaultDeviceValues() {
-	//log.debug "Executing 'setDefaultDeviceValues'"
-
-    updateDataValue('apiHost', '192.168.86.177:3000')
-    updateDataValue('deviceAddress', '192.168.86.32')
-    updateDataValue('deviceName', 'Chromecast-Audio-0caba597d78ea2791ecb4e03265b326c')
-}
-
 def logDeviceValues() {
 	//log.debug "Executing 'logDeviceValues'"
     //log.debug "apiHost: " + getDataValue('apiHost')
