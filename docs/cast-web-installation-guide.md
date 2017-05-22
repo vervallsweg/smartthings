@@ -60,6 +60,7 @@ Repeat this step for all your other audio groups.
 If you press the play button next to a group sync instance, it will level the volume of the group.
 
 <div class="ui fullscreen modal">
+	<div class="header"><i class="cloud remove"></i></div>
 	<div class="image content">
 		<img class="ui fluid image" src="" id="modalImage">
 	</div>
