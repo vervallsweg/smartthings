@@ -59,7 +59,7 @@ Repeat this step for all your other audio groups.
 
 If you press the play button next to a group sync instance, it will level the volume of the group.
 
-<div class="ui basic modal">
+<div class="ui fullscreen modal">
 	<div class="image content">
 		<img class="ui fluid image" src="" id="modalImage">
 	</div>
@@ -69,7 +69,7 @@ If you press the play button next to a group sync instance, it will level the vo
 	function showModal(imgUrl) {
 		console.log('imgUrl: '+imgUrl);
 		document.getElementById('modalImage').src = imgUrl;
-		$('.ui.basic.modal')
+		$('.ui.fullscreen.modal')
 		  .modal('show')
 		;
 	}
