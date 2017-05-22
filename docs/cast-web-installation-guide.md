@@ -11,10 +11,10 @@ Due to the limitations of the Smartthings platform all Google Cast requests (SOC
 Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.  
 ## Installing the DTH, service manager
 <div class="ui small images">
-  <img src="https://lorempixel.com/400/300">
-  <img src="https://lorempixel.com/400/300">
-  <img src="https://lorempixel.com/400/300">
-  <img src="https://lorempixel.com/400/300">
+  <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
+  <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
+  <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
+  <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
 </div>
 First copy the device the device type handler's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/device-handlers/cast-web "here"). Open the Smartthings IDE, log in > 'My Device Handlers' > '+ Create New Device Handler' > 'From Code' > paste the code from clipboard > 'Create'.
 
@@ -38,3 +38,12 @@ Now select the audio group you'd like to setup, then select all its members (exc
 Repeat this step for all your other audio groups.
 
 If you press the play button next to a group sync instance, it will level the groups volume.
+
+<script type="text/javascript">
+	function showModal(imgUrl) {
+		var div = document.createElement("div");
+		div.class = 'ui modal basic';
+		div.innerHTML = '<div class="image content"><img class="image" src="'+imgUrl+'"></div>';
+		//document.body.append
+	}
+</script>
