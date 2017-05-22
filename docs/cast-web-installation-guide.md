@@ -11,12 +11,12 @@ Due to the limitations of the Smartthings platform all Google Cast requests (SOC
 ## Setting up the API
 Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.  
 ## Installing the DTH, service manager
-<div class="ui small images">
+<!--div class="ui small images">
   <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
   <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
   <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
   <img src="https://lorempixel.com/400/300" onclick="showModal('https://lorempixel.com/400/300')">
-</div>
+</div-->
 First copy the device the device type handler's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/device-handlers/cast-web "here"). Open the Smartthings IDE, log in > 'My Device Handlers' > '+ Create New Device Handler' > 'From Code' > paste the code from clipboard > 'Create'.
 
 Second copy the service manager's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "here"). Open the IDE > 'My SmartApps' > 'New SmartApp' > 'From Code' > paste the code from clipboard > 'Create'.
@@ -42,7 +42,7 @@ If you press the play button next to a group sync instance, it will level the gr
 
 <div class="ui basic modal">
 	<div class="image content">
-		<img class="image" src="" id="modalImage">
+		<img class="ui fluid image" src="" id="modalImage">
 	</div>
 </div>
 
