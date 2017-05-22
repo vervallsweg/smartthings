@@ -60,8 +60,12 @@ Repeat this step for all your other audio groups.
 If you press the play button next to a group sync instance, it will level the volume of the group.
 
 <div class="ui fullscreen modal">
-	<div class="header" style="padding-top: 0; padding-bottom: 0;"><i class="icon remove"></i></div>
-	<div class="image content" onclick="$('.ui.fullscreen.modal').modal('hide');">
+	<div class="header" style="padding-top: 0; padding-bottom: 0;">
+		<i class="icon remove" onclick="function onclick() {
+			$('.ui.fullscreen.modal').modal('hide');
+		}"></i>
+	</div>
+	<div class="image content" style="padding-top: 0;">
 		<img class="ui fluid image" src="" id="modalImage">
 	</div>
 </div>
