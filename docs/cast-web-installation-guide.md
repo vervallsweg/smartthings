@@ -48,8 +48,9 @@ If you press the play button next to a group sync instance, it will level the gr
 <script type="text/javascript">
 	function showModal(imgUrl) {
 		document.getElementById('modalImage').src = imgUrl;
+		$('.ui.basic.modal')
+		  .modal('show')
+		;
 	}
-	$('.ui.basic.modal')
-	  .modal('show')
-	;
+
 </script>
