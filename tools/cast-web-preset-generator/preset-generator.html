@@ -7,13 +7,6 @@
 
   <title>Preset generator</title>
 
-  <!--<link rel="stylesheet" type="text/css" href="components/reset.css">
-  <link rel="stylesheet" type="text/css" href="components/site.css">
-
-  <link rel="stylesheet" type="text/css" href="dist/components/container.css">
-  <link rel="stylesheet" type="text/css" href="dist/components/divider.css">
-  <link rel="stylesheet" type="text/css" href="dist/components/grid.css">
-  <link rel="stylesheet" type="text/css" href="dist/components/header.css">-->
   <link rel="stylesheet" type="text/css" href="semantic-ui/semantic.min.css">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="semantic-ui/semantic.min.js"></script>
@@ -131,8 +124,11 @@
 	$('#copyToClipboard')
 	  .popup()
 	;
+
 	var importObject, editObject, outputObject;
 	var currentStep = 1;
+
+	setImportObjectFromHeader();
 
 	// STEPS
 	function step1() {
@@ -197,6 +193,11 @@
 		document.getElementById("preset_input").value = presetObject;
 	}
 
+	function setImportObjectFromHeader() {
+		var uriParameters = decodeURI(location.search.substr(1).split('&'));
+		if (uriParameters) { setImportObjectInput(uriParameters); }
+	}
+
 	// STEP 2
 	function setEditObject(presetObject) {
 		editObject = presetObject;
@@ -210,12 +211,25 @@
 		try {
 			for (var i = 1; i <= 6; i++) {
 				var currentForm = document.getElementById('preset'+i);
+				var mediaType = "";
+				var mediaStreamType = "";
+				try {
+					mediaType = currentForm.getElementsByClassName('mediaType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
+				} catch (e) {
+					console.log('mediaType not set');
+				}
+				try {
+					mediaStreamType = currentForm.getElementsByClassName('mediaStreamType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
+				} catch (e) {
+					console.log('mediaType not set');
+				}
+				console.log('mediaTitle: '+ mediaType);
 				presetObject['preset'+i] = {
 					mediaTitle: currentForm.getElementsByClassName('mediaTitle')[0].value,
 					mediaSubtitle: currentForm.getElementsByClassName('mediaSubtitle')[0].value,
-					mediaType: currentForm.getElementsByClassName('mediaType')[0].value,
+					mediaType: mediaType,
 					mediaUrl: currentForm.getElementsByClassName('mediaUrl')[0].value,
-					mediaStreamType: currentForm.getElementsByClassName('mediaStreamType')[0].value,
+					mediaStreamType: mediaStreamType,
 					mediaImageUrl: currentForm.getElementsByClassName('mediaImageUrl')[0].value
 				};
 			}
