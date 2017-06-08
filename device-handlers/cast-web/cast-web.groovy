@@ -34,6 +34,7 @@ metadata {
         capability "Polling"
         capability "Audio Notification"
         //capability "Health Check" //TODO: Implement health check
+
         command "restartPolling"
         command "updateAttributesMedia"
         command "playPreset", ["number"]
@@ -45,15 +46,15 @@ metadata {
         command "preset6"
         command "off"
         
-        // SONOS' SHITTY CUSTOM COMMANDS //command "subscribe" //command "getVolume" //command "getCurrentMedia" //command "getCurrentStatus" //command "seek" //command "unsubscribe" //command "setLocalLevel", ["number"] //command "tileSetLevel", ["number"] //attribute "currentValue"
-        command "playText", ["string"]
-        command "playTextAndResume", ["string","number"]
-        command "playTextAndRestore", ["string","number"]
-        command "playSoundAndTrack", ["string","number","json_object","number"]
-        command "playTextAndResume", ["string","json_object","number"] 
-        command "playTrackAtVolume", ["string","number"]
-        command "playTrackAndResume", ["string","number","number"]
-        command "playTrackAndRestore", ["string","number","number"]
+        // SONOS' CUSTOM COMMANDS: //command "subscribe" //command "getVolume" //command "getCurrentMedia" //command "getCurrentStatus" //command "seek" //command "unsubscribe" //command "setLocalLevel", ["number"] //command "tileSetLevel", ["number"] //attribute "currentValue" //command "playSoundAndTrack", ["string","number","json_object","number"] //command "playTrackAtVolume", ["string","number"]
+        //command "playText", ["string", "number"] //(STRING message, NUMBER level)
+        //command "playTextAndRestore", ["string","number"] //(STRING message, NUMBER level)
+        //command "playTrack", ["string","number"] //(STRING uri, NUMBER level)
+        //command "playTrackAndRestore", ["string","number","number"] //(STRING uri, NUMBER level)
+        
+        //LATER maybe use restoreTrack, resume Track 
+        //command "playTextAndResume", ["string","number"] //(STRING message, NUMBER level)
+        //command "playTrackAndResume", ["string","number","number"] //(STRING uri, NUMBER level)  
     }
 
     simulator {
@@ -301,10 +302,13 @@ def previousTrack() {
     selectableAction(settings.configPrev)
 }
 
-def playTrack(trackToPlay) {
-    //log.debug "Executing 'playTrack': "
-    // TODO: handle 'playTrack' command
-    setMediaPlayback('audio/mp3', trackToPlay, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
+def playTrack(uri, level) {
+    log.info "Executing 'playTrack': " + uri
+
+    if (level) {
+        setLevel(level)
+    }
+    return setMediaPlayback('audio/mp3', trackToPlay, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
 def setLevel(level) {
@@ -323,7 +327,7 @@ def unmute() {
     setDeviceMuted(false)
 }
 
-def setTrack() {
+def setTrack(trackToSet) {
     //log.debug "Executing 'setTrack'"
     // TODO: handle 'setTrack' command
 }
@@ -440,8 +444,8 @@ def off() {
 }
 
 def speak(phrase) {
-    def sound = textToSpeech(phrase, true)
-    return playTrack(sound.uri)
+    //def sound = textToSpeech(phrase, true)
+    return playTrack( textToSpeech(phrase, true).uri )
 }
 
 def playTrackAtVolume(String, number) {
@@ -449,17 +453,56 @@ def playTrackAtVolume(String, number) {
     
     def url = "" + String;
     if(number!=null) { setLevel(number); }
-    playTrack(String);
+    return playTrack(String)
 }
 
-def playTrackAndResume(String, number1, number2) {
-    log.info "playTrackAndResume";
-    playTrackAtVolume(String, number2)
+def playTrackAndResume(uri, level) {
+    log.info "playTrackAndResume: " + uri
+
+    if (level) {
+      setLevel(level)  
+    }
+    return playTrack(uri)
+    //TODO: resume playback to previously playing track
 }
 
-def playTrackAndRestore(String, number1, number2) {
-    log.info "playTrackAndRestore";
-    playTrackAtVolume(String, number2)
+def playTextAndResume(message, level) {
+    log.info "playTextAndResume: " + message
+
+    if (level) {
+      setLevel(level)  
+    }
+    return speak(message)
+    //TODO: resume playback to previously playing track
+}
+
+def playTrackAndRestore(uri, level) {
+    log.info "playTrackAndRestore: " + uri
+
+    if (level) {
+        setLevel(level)        
+    }
+    return playTrackAtVolume(uri, level)
+}
+
+def playText(message, level) {
+    log.info "playText, message: " + message
+
+    if (level) {
+        log.info "level: " + level
+        setLevel(number)
+    }
+    return speak(message)
+}
+
+def playTextAndRestore(message, level) {
+    log.info "playTextAndRestore, message: " + message
+
+    if (level) {
+        log.info "level: " + level
+        //TODO: Reset level to level before the message was played
+    }
+    return speak(message)
 }
 
 // HANDLE ATTRIBUTES
