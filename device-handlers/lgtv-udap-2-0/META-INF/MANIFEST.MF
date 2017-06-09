@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Executable: devicetypes/vervallsweg/lgtv-udap-2-0.src
+
+Name: lgtv-udap-2-0.groovy
+SHA1-Digest: 73850bc69a81cc4d6e659372e57d9037854541a4
+
+Name: i18n/messages.properties
+SHA1-Digest: da39a3ee5e6b4b0d3255bfef95601890afd80709
