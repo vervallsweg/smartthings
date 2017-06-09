@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Executable: smartapps/vervallsweg/lgtv-udap-2-0-service-manager.src
+
+Name: lgtv-udap-2-0-service-manager.groovy
+SHA1-Digest: 668ae49933bf2091c55437b58290925ad548f150
+
+Name: i18n/messages.properties
+SHA1-Digest: da39a3ee5e6b4b0d3255bfef95601890afd80709
