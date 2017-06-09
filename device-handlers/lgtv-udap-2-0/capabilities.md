@@ -33,3 +33,19 @@
 	>Attributes: volume, channel, power, picture, sound, movieMode
 	Commands: volumeUp, volumeDown, channelUp, channelDown
 ## roadmap
+### Version 0.1
+- "Switch" < on, off
+- "Switch Level" < either volume or brightness
+- "Polling" < refresh automatically
+- "Refresh" < refresh status
+-> rcu: power, volumeUp, volumeDown, brightness (eco), input, av, left, right, up, down, ok, back, exit
+### Version 0.2
+- "Samsung TV"
+- "TV"
+- "Music Player"
+- "Media Controller"
+### Version 3.0
+- "Speech Synthesis"
+- "Audio Notification"
+### Version 4.0
+- "Image Capture"
