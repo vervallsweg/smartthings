@@ -1,5 +1,5 @@
 /**
- *  cast-control
+ *  cast-web
  *
  *  Copyright 2017 Tobias Haerke
  *
