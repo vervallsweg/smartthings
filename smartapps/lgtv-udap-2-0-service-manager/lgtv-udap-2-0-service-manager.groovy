@@ -198,18 +198,19 @@ def addDevices() {
 		}
 
 		if (!d) {
-			/*log.debug "Creating Generic UPnP Device with dni: ${selectedDevice.value.mac}"
-			addChildDevice("smartthings", "Generic UPnP Device", selectedDevice.value.mac, selectedDevice?.value.hub, [
-				"label": selectedDevice?.value?.name ?: "Generic UPnP Device",
+        	log.debug "Creating LGTV UDAP 2.0 Device with name: " + selectedDevice.value.name + ", mac: " + selectedDevice.value.mac + ", ip: " + selectedDevice.value.networkAddress + ", port: " + selectedDevice.value.deviceAddress + ", netcruUrl: " + selectedDevice.value.ssdpPath
+        	
+			addChildDevice("vervallsweg", "LGTV UDAP 2.0", selectedDevice.value.mac, selectedDevice?.value.hub, [
+				"label": selectedDevice?.value?.name ?: "LGTV UDAP 2.0",
 				"data": [
 					"mac": selectedDevice.value.mac,
 					"ip": selectedDevice.value.networkAddress,
 					"port": selectedDevice.value.deviceAddress,
-                    "netcruUrl": "",
-                    "pairingKey": ""
+                    "netcruUrl": selectedDevice.value.ssdpPath,
+                    "pairingKey": "123456"
 				]
-			])*/
-            log.warn "device " + dni + " doesnot exist"
+			])
+            log.warn "device " + dni + " doesnot exist, selectedDevice: " + selectedDevice
 		} else {
         	log.warn "device " + dni + " exists"
         }
