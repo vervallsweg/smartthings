@@ -30,12 +30,14 @@
 	>Attributes: level
 	Commands: setLevel
 "TV"
-	>Attributes: volume, channel, power, picture, sound, movieMode
-	Commands: volumeUp, volumeDown, channelUp, channelDown
+	>Attributes: volume, channel, power, picture, sound, movieMode //Except content
+	Commands: volumeUp, volumeDown, channelUp, channelDown //DONE
 ## roadmap
 ### Version 0.1
 - "Switch" < on, off
 - "Switch Level" < either volume or brightness
+	-> volume level 
+	-> brighness level
 - "Polling" < refresh automatically
 - "Refresh" < refresh status
 -> rcu: power, volumeUp, volumeDown, brightness (eco), input, av, left, right, up, down, ok, back, exit
