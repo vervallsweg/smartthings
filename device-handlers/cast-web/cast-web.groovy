@@ -45,6 +45,7 @@ metadata {
         command "preset5"
         command "preset6"
         command "off"
+        command "checkForUpdate"
         
         // SONOS' CUSTOM COMMANDS: //command "subscribe" //command "getVolume" //command "getCurrentMedia" //command "getCurrentStatus" //command "seek" //command "unsubscribe" //command "setLocalLevel", ["number"] //command "tileSetLevel", ["number"] //attribute "currentValue" //command "playSoundAndTrack", ["string","number","json_object","number"] //command "playTrackAtVolume", ["string","number"]
         //command "playText", ["string", "number"] //(STRING message, NUMBER level)
@@ -118,7 +119,11 @@ metadata {
         }
         
         valueTile("deviceNetworkId", "device.dni", width: 2, height: 2) {
-            state "val", label:'${currentValue}', defaultState: true
+            state "val", label:'${currentValue}', defaultState: true, action: "checkForUpdate"
+        }
+        
+        valueTile("updateStatus", "device.updateStatus", width: 2, height: 2) {
+            state "val", label:'${currentValue}', defaultState: true, action: "checkForUpdate"
         }
         
         standardTile("preset1", "device.preset1Name", width: 2, height: 2, decoration: "flat") {
@@ -159,7 +164,8 @@ metadata {
                 "preset4",
                 "preset5",
                 "preset6",
-                "deviceNetworkId"])
+                "deviceNetworkId",
+                "updateStatus"])
     }
 }
 
@@ -758,6 +764,40 @@ def selectableAction(action) {
     }
     if(action=="Play preset 6") {
         playPreset(6)
+    }
+}
+
+//UPDATE
+def getThisVersion() {
+    return 0.1
+}
+
+def getLatestVersion() {
+    try {
+        httpGet([uri: "https://raw.githubusercontent.com/vervallsweg/smartthings/master/device-handlers/cast-web/version.json"]) { resp ->
+            log.debug "response status: ${resp.status}"
+            String data = "${resp.getData()}"
+            log.debug "data: ${data}"
+            
+            if(resp.status==200 && data!=null) {
+                return parseJson(data)
+            } else {
+                return null
+            }
+        }
+    } catch (e) {
+        log.error "something went wrong: $e"
+        return null
+    }
+}
+
+def checkForUpdate() {
+    if(getThisVersion() != getLatestVersion().version) {
+        //log.debug "New version available, " + "thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version
+        sendEvent(name: "updateStatus", value: (getThisVersion() + "\n Latestx: \n" + getLatestVersion().version), displayed: false)
+    } else {
+        sendEvent(name: "updateStatus", value: (getThisVersion() + "\nUp to date"), displayed: false)
+        log.info "Up to date, " + "thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version
     }
 }
 
