@@ -180,6 +180,7 @@ def installed() {
     updateDataValue('pollSecond', ""+rand.nextInt(60))
     updateDataValue('pollMinutes', "5")
     updateDataValue('deviceType', "video")
+    updateDataValue('logLevel', 0)
     startPolling()
     
     //Presets, tiles
@@ -223,6 +224,7 @@ def startPolling() {
 
     //log.debug "Scheduling polling task with \"${sched}\""
     schedule(sched, poll)
+    runEvery3Hours(checkForUpdate)
 }
 
 def stopPolling() {
@@ -802,6 +804,23 @@ def checkForUpdate() {
 }
 
 //DEBUGGING
+def logger(level, message) {
+    def logLevel = getDataValue('logLevel')
+    if(level=="error"&&logLevel>0) {
+        log.error message
+    }
+    if(level=="warn"&&logLevel>1) {
+        log.warn message
+    }
+    if(level=="info"&&logLevel>2) {
+        log.info message
+    }
+    if(level=="debug"&&logLevel>3) {
+        log.debug message
+    }
+    
+}
+
 def logDeviceValues() {
     //log.debug "Executing 'logDeviceValues'"
     //log.debug "apiHost: " + getDataValue('apiHost')
