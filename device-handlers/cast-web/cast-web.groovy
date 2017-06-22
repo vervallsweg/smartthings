@@ -119,7 +119,7 @@ metadata {
         }
         
         valueTile("deviceNetworkId", "device.dni", width: 2, height: 2) {
-            state "val", label:'${currentValue}', defaultState: true, action: "checkForUpdate"
+            state "val", label:'${currentValue}', defaultState: true
         }
         
         valueTile("updateStatus", "device.updateStatus", width: 2, height: 2) {
@@ -180,7 +180,7 @@ def installed() {
     updateDataValue('pollSecond', ""+rand.nextInt(60))
     updateDataValue('pollMinutes', "5")
     updateDataValue('deviceType', "video")
-    updateDataValue('logLevel', 0)
+    updateDataValue('logLevel', "0")
     startPolling()
     
     //Presets, tiles
@@ -805,7 +805,10 @@ def checkForUpdate() {
 
 //DEBUGGING
 def logger(level, message) {
-    def logLevel = getDataValue('logLevel')
+    def logLevel
+    if(getDataValue('logLevel')) {
+        logLevel = getDataValue('logLevel').toInteger()
+    }
     if(level=="error"&&logLevel>0) {
         log.error message
     }
