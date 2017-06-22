@@ -37,10 +37,11 @@
 - "Switch" < on, off
 - "Switch Level" < either volume or brightness
 	-> volume level 
-	-> brighness level
+	--> brighness level
 - "Polling" < refresh automatically
 - "Refresh" < refresh status
--> rcu: power, volumeUp, volumeDown, brightness (eco), input, av, left, right, up, down, ok, back, exit
+-> rcu: power, volumeUp, volumeDown, input, av, left, right, up, down, ok, back, exit
+--> rcu: brightness (eco)
 ### Version 0.2
 - "Samsung TV"
 - "TV"
