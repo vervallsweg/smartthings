@@ -35,6 +35,7 @@ preferences {
     page(name: "configureDevicePage")
     page(name: "saveDeviceConfigurationPage")
     page(name: "updateApiHostPage")
+    page(name: "updateServiceManagerPage")
 }
 
 def mainPage() {
@@ -49,6 +50,7 @@ def mainPage() {
            href "discoveryPage", title:"Discover Devices", description:""//, params: [pbutton: i]
            href "healthCheckPage", title: "Health check", description:""
            href(name: "presetGenerator",title: "Preset generator",required: false,style: "external",url: "https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html",description: "")
+           href "updateServiceManagerPage", title: "Check for updates", description:""
         }
         section("Installed Devices"){
             def dMap = [:]
@@ -375,4 +377,50 @@ def parse(description) {
     }
 }
 
-// TODO: implement event handlers
+//UPDATE
+def getThisVersion() {
+    return 0.1
+}
+
+def getLatestVersion() {
+    try {
+        httpGet([uri: "https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/google-cast-web-service-manager/version.json"]) { resp ->
+            log.debug "response status: ${resp.status}"
+            String data = "${resp.getData()}"
+            log.debug "data: ${data}"
+            
+            if(resp.status==200 && data!=null) {
+                return parseJson(data)
+            } else {
+                return null
+            }
+        }
+    } catch (e) {
+        log.error "something went wrong: $e"
+        return null
+    }
+}
+
+def checkForUpdate() {
+    if(getThisVersion() != getLatestVersion().version) {
+        return "Update available from: " + getThisVersion() + " to: " + getLatestVersion().version
+    } else {
+        log.debug "Up to date, " + "thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version
+        return "Up to date: " + getThisVersion()
+    }
+}
+
+def updateServiceManagerPage() {
+    dynamicPage(name:"updateServiceManagerPage", title:"Check for updates", nextPage: nextPage) {
+        section("Checked for updates") {
+            paragraph "" + checkForUpdate()
+        }
+        section("Latest version") {
+            def latestVersion = getLatestVersion()
+            paragraph "Version: " + latestVersion.version
+            paragraph "Type: " + latestVersion.type
+            paragraph "Release date: " + latestVersion.date
+            href(name: "Changelog",title: "Changelog",required: false, style: "external", url: latestVersion.changelog, description: "")
+        }
+    }
+}
