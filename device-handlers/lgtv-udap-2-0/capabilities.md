@@ -37,7 +37,7 @@
 - "Switch" < on, off
 - "Switch Level" < either volume or brightness
 	-> volume level 
-	--> brighness level
+	--> brighness level //NOT possible!
 - "Polling" < refresh automatically
 - "Refresh" < refresh status
 -> rcu: power, volumeUp, volumeDown, input, av, left, right, up, down, ok, back, exit
