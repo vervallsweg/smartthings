@@ -295,8 +295,6 @@ def stop() {
     logger('debug', "Executing 'stop'")
     if(device.currentValue("deviceSessionId")!=null){
         setDevicePlaybackStop(device.currentValue("deviceSessionId"))
-    } else {
-        //log.debug "No deviceSessionId"
     }
 }
 
@@ -351,12 +349,12 @@ def setDefaultPresets() {
             setDefaultPresetObject()
         }
         
-        try{p1=presets.preset1.mediaTitle}catch(Exception e){/*log.debug "Preset 1 not set"*/}
-        try{p2=presets.preset2.mediaTitle}catch(Exception e){/*log.debug "Preset 2 not set"*/}
-        try{p3=presets.preset3.mediaTitle}catch(Exception e){/*log.debug "Preset 3 not set"*/}
-        try{p4=presets.preset4.mediaTitle}catch(Exception e){/*log.debug "Preset 4 not set"*/}
-        try{p5=presets.preset5.mediaTitle}catch(Exception e){/*log.debug "Preset 5 not set"*/}
-        try{p6=presets.preset6.mediaTitle}catch(Exception e){/*log.debug "Preset 6 not set"*/}
+        try{p1=presets.preset1.mediaTitle}catch(Exception e){logger('debug', "Preset 1 not set")}
+        try{p2=presets.preset2.mediaTitle}catch(Exception e){logger('debug', "Preset 2 not set")}
+        try{p3=presets.preset3.mediaTitle}catch(Exception e){logger('debug', "Preset 3 not set")}
+        try{p4=presets.preset4.mediaTitle}catch(Exception e){logger('debug', "Preset 4 not set")}
+        try{p5=presets.preset5.mediaTitle}catch(Exception e){logger('debug', "Preset 5 not set")}
+        try{p6=presets.preset6.mediaTitle}catch(Exception e){logger('debug', "Preset 6 not set")}
         
     } else {
         setDefaultPresetObject()
@@ -790,7 +788,7 @@ def checkForUpdate() {
 
 //DEBUGGING
 def logger(level, message) {
-    def logLevel
+    def logLevel=0
     if(getDataValue('logLevel')) {
         logLevel = getDataValue('logLevel').toInteger()
     }
@@ -807,11 +805,4 @@ def logger(level, message) {
         log.debug message
     }
     
-}
-
-def logDeviceValues() {
-    //log.debug "Executing 'logDeviceValues'"
-    //log.debug "apiHost: " + getDataValue('apiHost')
-    //log.debug "deviceAddress: " + getDataValue('deviceAddress')
-    //log.debug "deviceName: " + getDataValue('deviceName')
 }
