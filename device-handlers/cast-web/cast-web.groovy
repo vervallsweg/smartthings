@@ -185,11 +185,13 @@ def installed() {
     
     //Presets, tiles
     sendEvent(name: "dni", value: device.deviceNetworkId, displayed: false)
+    sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
     setDefaultPresets()
 }
 
 def updated() {
     logger('debug', "Executing 'updated'")
+    sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
     
     setDefaultPresets()
     restartPolling()
@@ -777,11 +779,17 @@ def getLatestVersion() {
 }
 
 def checkForUpdate() {
-    if(getThisVersion() != getLatestVersion().version) {
+	def latestVersion = getLatestVersion()
+    if (latestVersion == null) {
+    	logger('error', "Couldn't check for new version, thisVersion: " + getThisVersion())
+        sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\n Error getting latest version \n"), displayed: false)
+        return null
+    }
+    if(getThisVersion() != latestVersion) {
         logger('debug', "New version available, " + "thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version)
-        sendEvent(name: "updateStatus", value: (getThisVersion() + "\n Latestx: \n" + getLatestVersion().version), displayed: false)
+        sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\n Latestx: \n" + getLatestVersion().version), displayed: false)
     } else {
-        sendEvent(name: "updateStatus", value: (getThisVersion() + "\nUp to date"), displayed: false)
+        sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nUp to date"), displayed: false)
         logger('info', "Up to date, " + "thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version)
     }
 }
