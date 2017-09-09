@@ -444,7 +444,7 @@ def off() {
 
 def speak(phrase) {
     //def sound = textToSpeech(phrase, true)
-    return playTrack( textToSpeech(phrase, true).uri )
+    return playTrack( textToSpeech(phrase, true).uri, 0 )
 }
 //AUDIO NOTIFICATION, TEXT
 def playText(message, level) {
@@ -472,9 +472,7 @@ def playTextAndRestore(message, level) {
 def playTrackAtVolume(String, number) {
     logger('info', "playTrackAtVolume" + String)
     
-    def url = "" + String;
-    if(number!=null) { setLevel(number); }
-    return playTrack(String)
+    return playTrack(String, number)
 }
 //AUDIO NOTIFICATION, TRACK
 def playTrack(uri, level) {
