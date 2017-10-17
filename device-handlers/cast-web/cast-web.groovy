@@ -311,8 +311,11 @@ def previousTrack() {
 }
 
 def setLevel(level) {
-    logger('debug', "Executing 'setLevel'")
-    double lvl = (double) level;
+    logger('debug', "Executing 'setLevel', level: " + level)
+    double lvl
+    try { lvl = (double) level; } catch (e) {
+        lvl = Double.parseDouble(level)
+    }
     setDeviceVolume(lvl)
 }
 
@@ -450,7 +453,7 @@ def speak(phrase) {
 def playText(message, level = 0, thirdValue = 0) {
     logger('info', "playText, message: " + message + " level: " + level)
     
-    if (level>0) { setLevel(level); } 
+    if (level!=0) { setLevel(level) }
     return speak(message)
 }
 
@@ -476,7 +479,7 @@ def playTrackAtVolume(trackToPlay, level = 0) {
 def playTrack(uri, level = 0, thirdValue = 0) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level)
 
-    if (level>0) { setLevel(level) }
+    if (level!=0) { setLevel(level) }
     return setMediaPlayback('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
