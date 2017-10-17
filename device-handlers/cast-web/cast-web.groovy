@@ -328,17 +328,17 @@ def unmute() {
 
 def setTrack(trackToSet) {
     logger('debug', "Executing 'setTrack'")
-    // TODO: handle 'setTrack' command
+    return playTrack(trackToSet)
 }
 
-def resumeTrack() {
+def resumeTrack(trackToSet) {
     logger('debug', "Executing 'resumeTrack'")
-    // TODO: handle 'resumeTrack' command
+    return playTrack(trackToSet)
 }
 
-def restoreTrack() {
+def restoreTrack(trackToSet) {
     logger('debug', "Executing 'restoreTrack'")
-    // TODO: handle 'restoreTrack' command
+    return playTrack(trackToSet)
 }
 
 def setDefaultPresets() {
@@ -447,53 +447,47 @@ def speak(phrase) {
     return playTrack( textToSpeech(phrase, true).uri )
 }
 //AUDIO NOTIFICATION, TEXT
-def playText(message, level) {
-    logger('info', "playText, message: " + message)
-
-    if (level && level>0) {
-        logger('info', "level: " + level)
-        setLevel(number)
-    }
+def playText(message, level = 0, thirdValue = 0) {
+    logger('info', "playText, message: " + message + " level: " + level)
+    
+    if (level>0) { setLevel(level); } 
     return speak(message)
 }
 
-def playTextAndResume(message, level) {
-    logger('info', "playTextAndResume, message: " + message)
+def playTextAndResume(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndResume, message: " + message + " level: " + level)
     //TODO: resume playback to previously playing track
     playText(message, level)
 }
 
-def playTextAndRestore(message, level) {
-    logger('info', "playTextAndRestore, message: " + message)
+def playTextAndRestore(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndRestore, message: " + message + " level: " + level)
     //TODO: Reset level to level before the message was played
     playText(message, level)
 }
 
-def playTrackAtVolume(String, number) {
-    logger('info', "playTrackAtVolume" + String)
+def playTrackAtVolume(trackToPlay, level = 0) {
+    logger('info', "playTrackAtVolume" + trackToPlay)
     
-    def url = "" + String;
-    if(number!=null) { setLevel(number); }
-    return playTrack(String)
+    def url = "" + trackToPlay;
+    return playTrack(url, level)
 }
 //AUDIO NOTIFICATION, TRACK
-def playTrack(uri, level) {
-    logger('info', "Executing 'playTrack', uri: " + uri)
+def playTrack(uri, level = 0, thirdValue = 0) {
+    logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level)
 
-    if (level && level>0) {
-        setLevel(level)
-    }
+    if (level>0) { setLevel(level) }
     return setMediaPlayback('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
-def playTrackAndResume(uri, level, thirdValue) {
-    logger('info', "Executing 'playTrackAndResume', uri: " + uri)
+def playTrackAndResume(uri, level = 0, thirdValue = 0) {
+    logger('info', "Executing 'playTrackAndResume', uri: " + uri + " level: " + level)
     //TODO: resume playback to previously playing track
     return playTrack(uri, level) 
 }
 
-def playTrackAndRestore(uri, level, thirdValue) {
-    logger('info', "Executing 'playTrackAndRestore', uri: " + uri)
+def playTrackAndRestore(uri, level = 0, thirdValue = 0) {
+    logger('info', "Executing 'playTrackAndRestore', uri: " + uri + " level: " + level)
     //TODO: restore
     return playTrack(uri, level) 
 }
