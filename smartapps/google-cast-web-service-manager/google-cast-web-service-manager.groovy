@@ -1,5 +1,5 @@
 /**
- *  Google cast web - service manager
+ *  Cast web - service manager
  *
  *  Copyright 2017 Tobias Haerke
  *
@@ -14,10 +14,10 @@
  *
  */
 definition(
-    name: "Google cast web - service manager",
+    name: "Cast web - service manager",
     namespace: "vervallsweg",
     author: "Tobias Haerke",
-    description: "Connect your Google Cast devices through a Google Cast web API.",
+    description: "Connect your Cast devices through the Cast web API to SmartThings.",
     category: "SmartThings Labs",
     iconUrl: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_cast_grey_24dp.png",
     iconX2Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_cast_grey_24dp.png",
@@ -40,13 +40,13 @@ preferences {
 
 def mainPage() {
     restartHealthCheck()
-    dynamicPage(name: "mainPage", title: "Manage your Google Cast devices", nextPage: null, uninstall: true, install: true) {
+    dynamicPage(name: "mainPage", title: "Manage your Cast devices", nextPage: null, uninstall: true, install: true) {
         section("Configure web API"){
            input "apiHostAddress", "string", title: "API host address", required: true
            href "checkApiConnectionPage", title: "Test API connection", description:""
            href "updateApiHostPage", title: "Update API host address", description:""
         }
-        section("Configure Google Cast devices"){
+        section("Configure Cast devices"){
            href "discoveryPage", title:"Discover Devices", description:""//, params: [pbutton: i]
            href "healthCheckPage", title: "Health check", description:""
            href(name: "presetGenerator",title: "Preset generator",required: false,style: "external",url: "https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html",description: "")
@@ -83,18 +83,18 @@ def discoveryPage() {
         getDevices()
         log.debug "refresh"
         
-        section("Please wait while we discover your Google Cast devices. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered.") {
+        section("Please wait while we discover your Cast devices. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered.") {
             if(state.latestDeviceMap!=null && state.latestDeviceMap.size()>0) {
-                input "selectedDevices", "enum", required:false, title:"Select Google Cast Device ("+ state.latestDeviceMap.size() +" found)", multiple:true, options: state.latestDeviceMap
+                input "selectedDevices", "enum", required:false, title:"Select Cast Device ("+ state.latestDeviceMap.size() +" found)", multiple:true, options: state.latestDeviceMap
                 state.selectedDevicesMap = state.latestDeviceMap
             } else {
-                input "selectedDevices", "enum", required:false, title:"Select Google Cast Device (0 found)", multiple:true, options: [:]
+                input "selectedDevices", "enum", required:false, title:"Select Cast Device (0 found)", multiple:true, options: [:]
                 state.selectedDevicesMap = null
             }
         }
-        section("Options") {
-            //href "deviceDiscovery", title:"Reset list of discovered devices", description:"", params: ["reset": "true"]
-        }
+        /*section("Options") {
+            href "deviceDiscovery", title:"Reset list of discovered devices", description:"", params: ["reset": "true"]
+        }*/
         
         state.latestDeviceMap = null
     }
@@ -103,7 +103,6 @@ def discoveryPage() {
 def addDevicesPage() {
     def addedDevices = addDevices(selectedDevices)
     def nextPage = "mainPage"
-    //if(addedDevices!=0){nextPage= "blah"}
     
     dynamicPage(name:"addDevicesPage", title:"Done", nextPage: nextPage) {
         section("Devices added") {
@@ -120,7 +119,7 @@ def addDevices(selectedDevices) {
         if(getChildDevices()?.find { it.deviceNetworkId == state.selectedDevicesMap[selectedDevices[i]] }) {
             log.error "Device exists!"
         } else {
-            log.debug "Doesnot exist, creating device: " + state.selectedDevicesMap[selectedDevices[i]]
+            log.debug "Does not exist, creating device: " + state.selectedDevicesMap[selectedDevices[i]]
          
             addChildDevice("vervallsweg", "cast-web", state.selectedDevicesMap[selectedDevices[i]], location.hubs[0].id, [
                 "label": state.latestDevicesNameMap[selectedDevices[i]],
@@ -183,7 +182,7 @@ def configureDevicePage(dni) {
             input(name: "poll_seconds", type: "number", title: "Refresh on every x second", defaultValue: [d.getDataValue("pollSecond")], required: true, range: "0..59")
         }
         section("Connection settings") {
-            input(name: "device_address", type: "text", title: "Google Cast device address", defaultValue: [d.getDataValue("deviceAddress")], required: true)
+            input(name: "device_address", type: "text", title: "Cast device address", defaultValue: [d.getDataValue("deviceAddress")], required: true)
             input(name: "api_host_address", type: "text", title: "Web API host address", defaultValue: [d.getDataValue("apiHost")], required: true)
         }
         section("Presets") {
@@ -216,7 +215,7 @@ def saveDeviceConfigurationPage() {
         section("Device type"){ paragraph ""+d.getDataValue("deviceType") }
         section("Refresh every x minute"){ paragraph ""+d.getDataValue("pollMinutes") }
         section("Refresh on every x second"){ paragraph ""+d.getDataValue("pollSecond") }
-        section("Google Cast device address"){ paragraph ""+d.getDataValue("deviceAddress") }
+        section("Cast device IP address"){ paragraph ""+d.getDataValue("deviceAddress") }
         section("Web API host address"){ paragraph ""+d.getDataValue("apiHost") }
         section("Presets"){ paragraph ""+d.getDataValue("presetObject") }
         section("Log level"){ paragraph ""+d.getDataValue("logLevel") }
