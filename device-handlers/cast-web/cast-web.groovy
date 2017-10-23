@@ -26,36 +26,32 @@ preferences {
  
 metadata {
     definition (name: "cast-web", namespace: "vervallsweg", author: "Tobias Haerke") {
-        capability "actuator"
-        capability "Music Player"
-        capability "switch"
-        capability "Speech Synthesis"
-        capability "Refresh"
-        capability "Polling"
+        capability "Actuator"
         capability "Audio Notification"
+        capability "Music Player"
+        capability "Polling"
+        capability "Refresh"
+        capability "Speech Synthesis"
+        capability "Switch"
         //capability "Health Check" //TODO: Implement health check
 
-        command "restartPolling"
-        command "updateAttributesMedia"
-        command "playPreset", ["number"]
+        command "checkForUpdate"
         command "preset1"
         command "preset2"
         command "preset3"
         command "preset4"
         command "preset5"
         command "preset6"
-        command "off"
-        command "checkForUpdate"
-        
-        // SONOS' CUSTOM COMMANDS: //command "subscribe" //command "getVolume" //command "getCurrentMedia" //command "getCurrentStatus" //command "seek" //command "unsubscribe" //command "setLocalLevel", ["number"] //command "tileSetLevel", ["number"] //attribute "currentValue" //command "playSoundAndTrack", ["string","number","json_object","number"] //command "playTrackAtVolume", ["string","number"]
-        //command "playText", ["string", "number"] //(STRING message, NUMBER level)
-        //command "playTextAndRestore", ["string","number"] //(STRING message, NUMBER level)
-        //command "playTrack", ["string","number"] //(STRING uri, NUMBER level)
-        //command "playTrackAndRestore", ["string","number","number"] //(STRING uri, NUMBER level)
-        
-        //LATER maybe use restoreTrack, resume Track 
-        //command "playTextAndResume", ["string","number"] //(STRING message, NUMBER level)
-        //command "playTrackAndResume", ["string","number","number"] //(STRING uri, NUMBER level)  
+        command "playPreset", ["number"]
+        //command "off"
+        command "playText", ["string"]
+        command "playText", ["string", "number"]
+        command "playTextAndResume", ["string"]
+        command "playTextAndResume", ["string", "number"]
+        command "playTextAndRestore", ["string"]
+        command "playTextAndRestore", ["string", "number"]
+        command "restartPolling"
+        command "updateAttributesMedia"
     }
 
     simulator {
@@ -450,7 +446,7 @@ def speak(phrase) {
     return playTrack( textToSpeech(phrase, true).uri )
 }
 //AUDIO NOTIFICATION, TEXT
-def playText(message, level = 0, thirdValue = 0) {
+def playText(message, level = 0) {
     logger('info', "playText, message: " + message + " level: " + level)
     
     if (level!=0) { setLevel(level) }
@@ -776,9 +772,9 @@ def getLatestVersion() {
 }
 
 def checkForUpdate() {
-	def latestVersion = getLatestVersion()
+    def latestVersion = getLatestVersion()
     if (latestVersion == null) {
-    	logger('error', "Couldn't check for new version, thisVersion: " + getThisVersion())
+        logger('error', "Couldn't check for new version, thisVersion: " + getThisVersion())
         sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\n Error getting latest version \n"), displayed: false)
         return null
     }
