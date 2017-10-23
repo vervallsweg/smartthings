@@ -791,7 +791,9 @@ def checkForUpdate() {
 def logger(level, message) {
     def logLevel=0
     if(getDataValue('logLevel')) {
-        logLevel = getDataValue('logLevel').toInteger()
+        if (getDataValue('logLevel').toInteger() >= 0 && getDataValue('logLevel').toInteger() < 4) {
+            logLevel = getDataValue('logLevel').toInteger()
+        }
     }
     if(level=="error"&&logLevel>0) {
         log.error message
