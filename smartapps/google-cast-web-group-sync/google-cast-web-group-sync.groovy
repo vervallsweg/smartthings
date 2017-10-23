@@ -1,5 +1,5 @@
 /**
- *  Google cast web - group sync
+ *  Cast web - group sync
  *
  *  Copyright 2017 Tobias Haerke
  *
@@ -14,10 +14,10 @@
  *
  */
 definition(
-    name: "Google cast web - group sync",
+    name: "Cast web - group sync",
     namespace: "vervallsweg",
     author: "Tobias Haerke",
-    description: "Syncs the music playback on a Google Cast audio group, accessed through a web API.",
+    description: "Syncs the music playback on a Cast audio group, accessed through a web API.",
     category: "Convenience",
     iconUrl: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
     iconX2Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
@@ -55,7 +55,7 @@ def initialize() {
 }
 
 def setLabel() {
-	if(app.label=="Google cast web - group sync") {
+	if(app.label=="Cast web - group sync") {
     	if(theAudioGroup.label) {
         	log.debug "Changing label to: " + theAudioGroup.label
             app.updateLabel(theAudioGroup.label)
