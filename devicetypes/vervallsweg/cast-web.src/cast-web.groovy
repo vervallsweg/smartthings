@@ -754,7 +754,7 @@ def getThisVersion() {
 
 def getLatestVersion() {
     try {
-        httpGet([uri: "https://raw.githubusercontent.com/vervallsweg/smartthings/master/device-handlers/cast-web/version.json"]) { resp ->
+        httpGet([uri: "https://raw.githubusercontent.com/vervallsweg/smartthings/master/devicetypes/vervallsweg/cast-web.src/version.json"]) { resp ->
             logger('debug', "response status: ${resp.status}")
             String data = "${resp.getData()}"
             logger('debug', "data: ${data}")
