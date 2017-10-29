@@ -141,12 +141,23 @@ def addDevices(selectedDevices) {
 
 def updateDeviceAddresses() {
     log.debug "updateDeviceAddresses() executed"
+    
+    //TODO: cleanMapOfDuplicates(map)
+    
     def deviceMap = state.latestDeviceMap
     def updatedDeviceMap = [:]
     
     deviceMap.each { key, value ->
-        log.debug "Selected device address: "+key+ ", DNI: " + value
+        log.debug "Selected device address: " + key + ", DNI: " + value
         def d = getChildDevices()?.find { it.deviceNetworkId == value }
+        //REALY bad temporary fix to deal with dealing group ids
+        if(!d) {
+            d = getChildDevices()?.find { it.deviceNetworkId == flipCastId(value) }
+            if(d) {
+                log.warn "DNI: " + d.deviceNetworkId + " moved to: " + value
+                d.setDeviceNetworkId(value)
+            }
+        }
         
         if(d) {
             log.warn "Device (" + d + ":" + d.deviceNetworkId + ") exists, old address: " + d.getDataValue("deviceAddress") + " new address: " + key
@@ -158,6 +169,31 @@ def updateDeviceAddresses() {
     log.debug "updateDeviceAddresses() finished, updatedDeviceMap: " + updatedDeviceMap
     state.latestUpdatedDevicesMap = updatedDeviceMap
     state.latestUpdatedDevicesTime = getTimeStamp()
+}
+
+def flipCastId(castId) {
+    log.debug "flipCastId() executed, castId: " + castId
+    log.debug "flipCastId, last two characters: " + castId[-2..-1]
+    
+    if( castId[-2..-1].equals("-1") ) {
+        log.debug "flipCastId flipped: " + castId[0..-3]
+        return castId[0..-3]
+    } else {
+        log.debug "flipCastId flipped: " + castId+"-1"
+        return castId+"-1"
+    }
+}
+
+def cleanMapOfDuplicates(map) {
+    log.debug "cleanMapOfDuplicates() executed"
+    /*def deviceMap = state.latestDeviceMap
+    
+    deviceMap.each { key, value ->
+        if (currentDevice.id INSIDE deviceMap.flippedID) {
+            //Duplicate entry, remove new id, keep old id from getChildDevices
+        }
+        
+    }*/
 }
 
 def configureDevicePage(dni) {
@@ -249,13 +285,13 @@ def healthCheckPage() {
     
     dynamicPage(name: "healthCheckPage", title: title, nextPage: "mainPage") {
         section("Latest health check at") {
-            paragraph ""+lastRunAt
+            paragraph "" + getTimeStringFromEpoch(lastRunAt)
         }
         section("Result of the latest health check (every 15 minutes)") {
             if(latestUpdatedDevicesMap==null|| latestUpdatedDevicesMap==[:]) {
                 paragraph "Nothing changed"
             } else {
-                paragraph ""+latestUpdatedDevicesMap
+                paragraph "" + latestUpdatedDevicesMap
             }
         }
     }
@@ -323,6 +359,11 @@ def getTimeStamp() {
     def timeStamp = (long)(now.getTime()/1000)
     log.info "Timestamp generated: "+timeStamp
     return timeStamp;
+}
+
+def getTimeStringFromEpoch(epoch) {
+    long ep = (long) epoch;
+    return new Date(ep).toString()
 }
 
 def getDevices() {
