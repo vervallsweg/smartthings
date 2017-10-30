@@ -1,10 +1,10 @@
 # Changelog
 ## Version 0.1
-- Update mechanism added
-- Renamed .grovy to final name
+- Check for updates on every device page
+- SmartThings GitHub integration
+- [Audio notification](http://docs.smartthings.com/en/latest/capabilities-reference.html#audio-notification "Audio notification") capability added
+- SmartThings 'Speaker Companion' [fixed](https://github.com/vervallsweg/smartthings/issues/7 "fixed")
+- DTH's loging level can now be changed
+- Group playback detection temporarily disabled
+- Renamed to cast-web
 - Changelog added
-- Fixed Smartthings 'Speaker companion' support ([Audio notification](http://docs.smartthings.com/en/latest/capabilities-reference.html#audio-notification "Audio notification"))
-- add loging option
-
-## Version 0.2
--- fix group sync issues
