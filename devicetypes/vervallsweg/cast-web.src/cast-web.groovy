@@ -245,6 +245,7 @@ def parse(String description) {
         msg = parseLanMessage(description)
         status = msg.status
         json = msg.json
+        logger('debug', 'parse, msg.json: ' + json)
     } catch (e) {
         logger('warn', "Exception caught while parsing data: "+e)
         setDefaultAttributes()
@@ -449,7 +450,7 @@ def speak(phrase) {
 def playText(message, level = 0) {
     logger('info', "playText, message: " + message + " level: " + level)
     
-    if (level!=0) { setLevel(level) }
+    if (level!=0&&level!=null) { setLevel(level) }
     return speak(message)
 }
 
@@ -475,18 +476,30 @@ def playTrackAtVolume(trackToPlay, level = 0) {
 def playTrack(uri, level = 0, thirdValue = 0) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level)
 
-    if (level!=0) { setLevel(level) }
-    return setMediaPlayback('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings%20playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
+    if (level!=0&&level!=null) { setLevel(level) }
+    return setMediaPlayback('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
-def playTrackAndResume(uri, level = 0, thirdValue = 0) {
+def playTrackAndResume(uri, level = 0) {
     logger('info', "Executing 'playTrackAndResume', uri: " + uri + " level: " + level)
     //TODO: resume playback to previously playing track
+    return playTrack(uri, level)
+}
+
+def playTrackAndResume(String uri, String duration, level = 0) {
+    logger('info', "Executing 'playTrackAndResume', uri: " + uri + " duration: " + duration + " level: " + level)
+    //TODO: resume playback to previously playing track
+    return playTrack(uri, level)
+}
+
+def playTrackAndRestore(uri, level = 0) {
+    logger('info', "Executing 'playTrackAndRestore', uri: " + uri + " level: " + level)
+    //TODO: restore
     return playTrack(uri, level) 
 }
 
-def playTrackAndRestore(uri, level = 0, thirdValue = 0) {
-    logger('info', "Executing 'playTrackAndRestore', uri: " + uri + " level: " + level)
+def playTrackAndRestore(String uri, String duration, level = 0) {
+    logger('info', "Executing 'playTrackAndRestore', uri: " + uri + " duration: " + duration + " level: " + level)
     //TODO: restore
     return playTrack(uri, level) 
 }
@@ -543,9 +556,9 @@ def updateAttributesMedia(mediaStatus) {
         }
     } else {
         logger('debug', "mediaStatus.playerState not set, probably group playback")
-        sendEvent(name: "status", value: "group");
+        /*sendEvent(name: "status", value: "group");
         sendEvent(name: "switch", value: on)
-        sendEvent(name: "playpause", value: "play", displayed: false)
+        sendEvent(name: "playpause", value: "play", displayed: false)*/
     }
     
     if(mediaStatus.media) {
@@ -559,7 +572,7 @@ def updateAttributesMedia(mediaStatus) {
         } 
     } else {
         logger('debug', "mediaStatus.media not set, probably group playback")
-        sendEvent(name: "trackData", value: ('{ "title": "Group playback" }'), displayed: false)
+        /*sendEvent(name: "trackData", value: ('{ "title": "Group playback" }'), displayed: false)*/
         updateAttributesTrack()
     }
     
@@ -791,9 +804,7 @@ def checkForUpdate() {
 def logger(level, message) {
     def logLevel=0
     if(getDataValue('logLevel')) {
-        if (getDataValue('logLevel').toInteger() >= 0 && getDataValue('logLevel').toInteger() < 4) {
-            logLevel = getDataValue('logLevel').toInteger()
-        }
+        logLevel = getDataValue('logLevel').toInteger()
     }
     if(level=="error"&&logLevel>0) {
         log.error message
