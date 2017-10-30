@@ -4,8 +4,9 @@
 Device handler for all Google Cast enabled devices (audio/video/groups). Implements all Bose SoundTouch and most Sonos functions. Due to limitations of the Samsung Smartthings platform it requires an HTTP API on your local network. 
 [Installation Guide](https://vervallsweg.github.io/smartthings/cast-web-installation-guide "Installation Guide")
 ## Smartapps
-### [google-cast-web-service-manager](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "google-cast-web-service-manager")
-Service manager for the cast-web dth. It let's you discover and add new devices, configure them, takes care of address changes and much more.
+### [cast-web-service-manager](https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-service-manager.src/cast-web-service-manager.groovy "cast-web-service-manager")
+Service manager for the cast-web device handler. It let's you discover and add new devices, configure them, takes care of address changes and much more.
+[Changelog](https://github.com/vervallsweg/smartthings/blob/master/smartapps/vervallsweg/cast-web-service-manager.src/README.md "Changelog")
 ### [google-cast-web-group-sync](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-group-sync "google-cast-web-group-sync")
 After you added your audio groups and there members to Smartthings, this app makes them work properly. Install it, select the audio group, its members (not the group itself), done! It now syncs the meta data between the group members and let's you level the groups volume, by taping the little play button next to the installed smartapp.
 ## Tools

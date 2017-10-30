@@ -26,7 +26,7 @@ First copy the device the device type handler's groovy code from [here](https://
   <img src="img/smartapps_steps/servicemanager_step3.jpeg" onclick="showModal('img/smartapps_steps/servicemanager_step3.jpeg')">
   <img src="img/smartapps_steps/servicemanager_step4.jpeg" onclick="showModal('img/smartapps_steps/servicemanager_step4.jpeg')">
 </div>
-Second copy the service manager's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "here"). Open the IDE > 'My SmartApps' > 'New SmartApp' > 'From Code' > paste the code from clipboard > 'Create'.
+Second copy the service manager's groovy code from [here](https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-service-manager.src/cast-web-service-manager.groovy "here"). Open the IDE > 'My SmartApps' > 'New SmartApp' > 'From Code' > paste the code from clipboard > 'Create'.
 
 Done!
 
