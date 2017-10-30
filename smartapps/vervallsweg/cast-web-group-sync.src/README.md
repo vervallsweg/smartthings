@@ -1,3 +1,5 @@
 # Changelog
 ## Version 0.1
-- Renamed to it's proper name
+- SmartThings GitHub integration
+- Renamed to cast-web-group-sync
+- Changelog added
