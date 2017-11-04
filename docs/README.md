@@ -7,8 +7,9 @@ Device handler for all Google Cast enabled devices (audio/video/groups). Works w
 ## Smartapps
 ### [google-cast-web-service-manager](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "google-cast-web-service-manager")
 Service manager for the cast-web dth. It let's you discover and add new devices, configure them, takes care of address changes and much more.
-### [google-cast-web-group-sync](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-group-sync "google-cast-web-group-sync")
-After you added your audio groups and there members to Smartthings, this app makes them work properly. Install it, select the audio group, its members (not the group itself), done! It now syncs the meta data between the group members and let's you level the groups volume, by taping the little play button next to the installed smartapp.
+### [cast-web-group-sync](https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-group-sync.src/cast-web-group-sync.groovy "cast-web-group-sync")
+After you added your audio groups and there part of SmartThings, this app makes them work properly. Install it, select the audio group, its members (not the group itself), done! It now syncs the meta data between the group members and let's you level the group's volume, by taping the little play button next to the installed smartapp.
+-> [Changelog](https://github.com/vervallsweg/smartthings/blob/master/smartapps/vervallsweg/cast-web-group-sync.src/README.md "Changelog")
 ## Tools
 ### [cast-web-preset-generator](https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html "cast-web-preset-generator")
 The cast-web dth let's you play presets by tapping the corresponding button in the dth or using a smartapp, routine, CoRE. The presets are saved in a JSON formated preset object and cannot be edited within Smartthings. Use this webapp to generate and edit your presets and save them to your cast-web device.
