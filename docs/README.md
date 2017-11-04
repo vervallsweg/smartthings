@@ -5,8 +5,9 @@ Device handler for all Google Cast enabled devices (audio/video/groups). Works w
 [Installation Guide](https://vervallsweg.github.io/smartthings/cast-web-installation-guide "Installation Guide")
 -> [Changelog](https://github.com/vervallsweg/smartthings/blob/master/devicetypes/vervallsweg/cast-web.src/README.md "Changelog")
 ## Smartapps
-### [google-cast-web-service-manager](https://github.com/vervallsweg/smartthings/tree/master/smartapps/google-cast-web-service-manager "google-cast-web-service-manager")
-Service manager for the cast-web dth. It let's you discover and add new devices, configure them, takes care of address changes and much more.
+### [cast-web-service-manager](https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-service-manager.src/cast-web-service-manager.groovy "cast-web-service-manager")
+Service manager for the cast-web device handler. It let's you discover and add new devices, configure them, takes care of address changes and much more.
+-> [Changelog](https://github.com/vervallsweg/smartthings/blob/master/smartapps/vervallsweg/cast-web-service-manager.src/README.md "Changelog")
 ### [cast-web-group-sync](https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-group-sync.src/cast-web-group-sync.groovy "cast-web-group-sync")
 After you added your audio groups and there part of SmartThings, this app makes them work properly. Install it, select the audio group, its members (not the group itself), done! It now syncs the meta data between the group members and let's you level the group's volume, by taping the little play button next to the installed smartapp.
 -> [Changelog](https://github.com/vervallsweg/smartthings/blob/master/smartapps/vervallsweg/cast-web-group-sync.src/README.md "Changelog")

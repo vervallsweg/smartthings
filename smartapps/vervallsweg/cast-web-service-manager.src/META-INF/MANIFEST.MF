@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
-Executable: smartapps/vervallsweg/google-cast-web-service-manager.src
+Executable: smartapps/vervallsweg/cast-web-service-manager.src
 
-Name: google-cast-web-service-manager.groovy
+Name: cast-web-service-manager.groovy
 SHA1-Digest: 2d75faa3b228ef1f3058fd5e1114a60f80ca36b7
 
 Name: i18n/messages.properties
