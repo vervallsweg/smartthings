@@ -18,7 +18,7 @@ Install node.js, then install the API as described in the [documentation](https:
   <img src="img/dth_steps/dth_step4.jpeg" onclick="showModal('img/dth_steps/dth_step4.jpeg')">
   <img src="img/dth_steps/dth_step5.jpeg" onclick="showModal('img/dth_steps/dth_step5.jpeg')">
 </div>
-First copy the device the device type handler's groovy code from [here](https://github.com/vervallsweg/smartthings/tree/master/device-handlers/cast-web "here"). Open the Smartthings IDE, log in > 'My Device Handlers' > '+ Create New Device Handler' > 'From Code' > paste the code from clipboard > 'Create'.
+First copy the device the device type handler's groovy code from [here](https://raw.githubusercontent.com/vervallsweg/smartthings/master/devicetypes/vervallsweg/cast-web.src/cast-web.groovy "here"). Open the Smartthings IDE, log in > 'My Device Handlers' > '+ Create New Device Handler' > 'From Code' > paste the code from clipboard > 'Create'.
 
 <div class="ui small images">
   <img src="img/smartapps_steps/servicemanager_step1.jpeg" onclick="showModal('img/smartapps_steps/servicemanager_step1.jpeg')">
