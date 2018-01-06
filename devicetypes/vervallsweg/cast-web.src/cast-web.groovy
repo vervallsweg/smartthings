@@ -256,17 +256,16 @@ def parse(String description) {
         state.badResponseCounter=0
         if(json.type=="RECEIVER_STATUS"){
             logger('debug', "Received RECEIVER_STATUS")
-            updateAttributesDevice(json.status)
+            parseReceiverStatus(json.status)
         }
         if(json.type=="MEDIA_STATUS"){
             logger('debug', "Received MEDIA_STATUS")
-            updateAttributesMedia(json.status)
+            parseMediaStatus(json.status)
             if(device.currentValue("lastPresetPlayed")!=null) {
                 logger('warn', "last preset played: " + device.currentValue("lastPresetPlayed"))
                 getDeviceStatus()
                 sendEvent(name: "lastPresetPlayed", value: null)
             }
-            
         }
     } else {
         logger('error', "HTTP response not ok, status code: " + status + " requestId: " + msg.requestId)
@@ -505,87 +504,103 @@ def playTrackAndRestore(String uri, String duration, level = 0) {
 }
 
 // HANDLE ATTRIBUTES
-def updateAttributesDevice(deviceStatus) {
-    logger('debug', "Executing 'updateAttributesDevice'")
+def parseReceiverStatus(deviceStatus) {
+    logger('debug', "Executing 'parseReceiverStatus'")
     
-    if(deviceStatus.volume.level) {
-        logger('debug', "deviceStatus.volume.level: "+(Math.round(deviceStatus.volume.level*100)))
-        sendEvent(name: "level", value: Math.round(deviceStatus.volume.level*100), unit: "%")
-    }
-    if(deviceStatus.volume.muted) {
-        logger('debug', "deviceStatus.volume.muted: "+deviceStatus.volume.muted)
-        sendEvent(name: "mute", value: "muted")
-    } else {
-        logger('debug', "deviceStatus.volume.muted: "+deviceStatus.volume.muted)
-        sendEvent(name: "mute", value: "unmuted")
-    }
-    try {
-        if(deviceStatus.applications.displayName.get(0)!="Backdrop"&&getDataValue("deviceType")!="Video") {
-            logger('debug', "Receiver has sessionId: "+deviceStatus.applications.sessionId.get(0))
-            sendEvent(name: "deviceSessionId", value: deviceStatus.applications.sessionId.get(0), displayed: false)
-
-            logger('debug', "Receiver application running, displayName: "+deviceStatus.applications.displayName.get(0))
-            sendEvent(name: "deviceApplicationDisplayName", value: deviceStatus.applications.displayName.get(0), displayed: false)
-            getMediaStatus(deviceStatus.applications.sessionId.get(0))
-        } else {
-            throw new NullPointerException() //Btw. check the logs, such ironic expection caught :D
+    if(deviceStatus.volume) {
+        if(deviceStatus.volume.level) {
+            logger('debug', "deviceStatus.volume.level: "+(Math.round(deviceStatus.volume.level*100)))
+            sendEvent(name: "level", value: Math.round(deviceStatus.volume.level*100), unit: "%")
         }
-    } catch (e) {
+        if(deviceStatus.volume.muted) {
+            logger('debug', "deviceStatus.volume.muted: "+deviceStatus.volume.muted)
+            sendEvent(name: "mute", value: "muted")
+        }
+        if(!deviceStatus.volume.muted) {
+            logger('debug', "deviceStatus.volume.muted: "+deviceStatus.volume.muted)
+            sendEvent(name: "mute", value: "unmuted")
+        }
+    }
+    
+    if(deviceStatus.applications) {
+        if(deviceStatus.applications.isIdleScreen) {
+            //Handle backdrop > set readyToCast
+        }
+        if(deviceStatus.applications.isIdleScreen) {
+            if(deviceStatus.applications.sessionId) {
+                if( deviceStatus.applications.sessionId.get(0) ){
+                    logger('debug', "Receiver has sessionId: " + deviceStatus.applications.sessionId.get(0))
+                    sendEvent(name: "deviceSessionId", value: deviceStatus.applications.sessionId.get(0), displayed: false) //TODO: trackData
+                    getMediaStatus(deviceStatus.applications.sessionId.get(0)) // maybe from trackData with optional parameter sessionId 
+                }
+            }
+            if(deviceStatus.applications.displayName) {
+                if( deviceStatus.applications.displayName.get(0) ) {
+                    logger('debug', "Receiver application running, displayName: "+deviceStatus.applications.displayName.get(0)) //TODO: trackData
+                    sendEvent(name: "deviceApplicationDisplayName", value: deviceStatus.applications.displayName.get(0), displayed: false) //TODO: trackData
+                }
+            }
+        }
+    }
+    /*} catch (e) {
         logger('debug', "No application running, exception: "+e)
         sendEvent(name: "status", value: "Ready to cast")
         sendEvent(name: "switch", value: off)
         sendEvent(name: "playpause", value: "pause", displayed: false)
         setDefaultAttributesMedia()
-    }
+    }*/
 }
 
-def updateAttributesMedia(mediaStatus) {
-    logger('debug', "Executing 'updateAttributesMedia'")
-    logger('debug', "mediaStatus: "+mediaStatus)
+def parseMediaStatus(mediaStatus) {
+    logger('debug', "Executing 'parseMediaStatus', mediaStatus: "+mediaStatus)
     
-    if(mediaStatus.playerState) {
-        logger('debug', "mediaStatus.playerState: "+mediaStatus.playerState.get(0).toLowerCase())
-        sendEvent(name: "status", value: mediaStatus.playerState.get(0).toLowerCase(), changed: true)
-        if(mediaStatus.playerState.get(0).toLowerCase()=="playing") {
-            sendEvent(name: "playpause", value: "play", displayed: false)
-            sendEvent(name: "switch", value: on)
+    if(mediaStatus.playerState) { //JSON on group playback = "status": []
+        if(mediaStatus.playerState) {
+            if( mediaStatus.playerState.get(0) ) {
+                logger('debug', "mediaStatus.playerState: "+mediaStatus.playerState.get(0).toLowerCase())
+                sendEvent(name: "status", value: mediaStatus.playerState.get(0).toLowerCase(), changed: true)
+                
+                if(mediaStatus.playerState.get(0).toLowerCase()=="playing") {
+                    sendEvent(name: "playpause", value: "play", displayed: false)
+                    sendEvent(name: "switch", value: on)
+                }
+                if(mediaStatus.playerState.get(0).toLowerCase()=="paused") {
+                    sendEvent(name: "playpause", value: "pause", displayed: false)
+                    sendEvent(name: "switch", value: off)
+                }
+            }
         }
-        if(mediaStatus.playerState.get(0).toLowerCase()=="paused") {
-            sendEvent(name: "playpause", value: "pause", displayed: false)
-            sendEvent(name: "switch", value: off)
+        
+        if(mediaStatus.media) {
+            if(mediaStatus.media.metadata.metadataType) {
+                if( mediaStatus.media.metadata.metadataType.get(0) ) {
+                    if(mediaStatus.media.metadata.metadataType.get(0)==3||mediaStatus.media.metadata.metadataType.get(0)==0) {
+                        logger('debug', "mediaStatus.media.metadata.metadataType is MusicTrackMediaMetadata")
+                        JSONObject jsonO = new JSONObject(mediaStatus.media.metadata.get(0))
+                        sendEvent(name: "trackData", value: jsonO, displayed:false)
+                        updateAttributesTrack()
+                    }
+                }
+            }
         }
-    } else {
-        logger('debug', "mediaStatus.playerState not set, probably group playback")
+
+        if(mediaStatus.mediaSessionId){
+            if( mediaStatus.mediaSessionId.get(0) ) {
+                logger('debug', "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId.get(0))
+                sendEvent(name: "deviceMediaSessionId", value: mediaStatus.mediaSessionId.get(0), displayed: false)
+            }
+        }
+    }
+    
+    if(!mediaStatus.playerState) {
+        logger('debug', "mediaStatus.playerState not set, probably group playback") //TODO: setGroupPlayback
         /*sendEvent(name: "status", value: "group");
         sendEvent(name: "switch", value: on)
         sendEvent(name: "playpause", value: "play", displayed: false)*/
     }
-    
-    if(mediaStatus.media) {
-        if(mediaStatus.media.metadata.metadataType) { //OR IS PART OF GROUP PLAYBACK
-            if(mediaStatus.media.metadata.metadataType.get(0)==3||mediaStatus.media.metadata.metadataType.get(0)==0) {
-                logger('debug', "mediaStatus.media.metadata.metadataType is MusicTrackMediaMetadata")
-                JSONObject jsonO = new JSONObject(mediaStatus.media.metadata.get(0))
-                sendEvent(name: "trackData", value: jsonO, displayed:false)
-                updateAttributesTrack()
-            }
-        } 
-    } else {
-        logger('debug', "mediaStatus.media not set, probably group playback")
-        /*sendEvent(name: "trackData", value: ('{ "title": "Group playback" }'), displayed: false)*/
-        updateAttributesTrack()
-    }
-    
-    if(mediaStatus.mediaSessionId){
-        logger('debug', "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId.get(0))
-        sendEvent(name: "deviceMediaSessionId", value: mediaStatus.mediaSessionId.get(0), displayed: false)
-    } else {
-        logger('debug', "mediaStatus.mediaSessionId not set, probably group playback")
-        sendEvent(name: "deviceMediaSessionId", value: null, displayed: false)
-    }
 }
 
-def updateAttributesTrack() {
+def updateAttributesTrack() { //TODO, parse in parseMediaStatus
     logger('debug', "Executing 'updateAttributesTrack'")
     JSONObject jO = new JSONObject(device.currentValue("trackData"))
     
