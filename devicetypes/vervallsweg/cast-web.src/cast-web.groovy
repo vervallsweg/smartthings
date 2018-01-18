@@ -217,56 +217,47 @@ def restartPolling() {
 
 // parse events into attributes
 def parse(String description) {
-    logger('debug', "Parsing '${description}'")
+    logger('debug', "'parse', parsing: '${description}'")
     
-    def msg, json
     try {
-        msg = parseLanMessage(description)
-        json = msg.json
-        logger('debug', 'parse, msg.json: ' + json)
-    } catch (e) {
-        logger('error', "Exception caught while parsing data: "+e)
-        //TODO: Health check
-    }
-    
-    if(msg.status==200){
-        state.badResponseCounter=0
-        if(json.type=="RECEIVER_STATUS"){
-            logger('debug', "Received RECEIVER_STATUS")
-            parseReceiverStatus(json.status)
-        }
-        if(json.type=="MEDIA_STATUS"){
-            logger('debug', "Received MEDIA_STATUS")
-            parseMediaStatus(json.status)
-            if(device.currentValue("lastPresetPlayed")!=null) {
-                logger('warn', "last preset played: " + device.currentValue("lastPresetPlayed"))
-                getDeviceStatus()
-                sendEvent(name: "lastPresetPlayed", value: null)
+        def msg = parseLanMessage(description)
+        logger('debug', 'parse, msg.json: ' + msg.json)
+        
+        if(msg.status==200){
+            state.badResponseCounter=0
+            if(msg.json.type=="RECEIVER_STATUS"){
+                parseReceiverStatus(msg.json.status)
             }
+            if(msg.json.type=="MEDIA_STATUS"){
+                parseMediaStatus(msg.json.status)
+            }
+        } else {
+            logger('error', "HTTP response not ok, status code: " + msg.status + " requestId: " + msg.requestId)
+            state.badResponseCounter++ //TODO: Health check
         }
-    } else {
-        logger('error', "HTTP response not ok, status code: " + msg.status + " requestId: " + msg.requestId)
-        state.badResponseCounter++ //TODO: Health check
+    } catch (e) {
+        logger('error', "Exception caught while parsing data: "+e) //TODO: Health check
     }
 }
 
 // handle commands
 def play() {
-    def trackData = getTrackData(['sessionId', 'mediaSessionId'])
-    logger('debug', "Executing 'play' trackData: " + trackData)
-    if(trackData['sessionId']&&trackData['mediaSessionId']){ setMediaPlaybackPlay(trackData['sessionId'], trackData['mediaSessionId']) }
+    logger('debug', "Executing 'play'")
+    if(getTrackData(['sessionId'])[0]&&getTrackData(['mediaSessionId'])[0]){ 
+        setMediaPlaybackPlay(getTrackData(['sessionId'])[0], getTrackData(['mediaSessionId'])[0])
+    }
 }
 
 def pause() {
-    def trackData = getTrackData(['sessionId', 'mediaSessionId'])
-    logger('debug', "Executing 'pause' trackData: " + trackData)
-    if(trackData['sessionId']&&trackData['mediaSessionId']){ setMediaPlaybackPause(trackData['sessionId'], trackData['mediaSessionId']) }
+    logger('debug', "Executing 'pause'")
+    if(getTrackData(['sessionId'])[0]&&getTrackData(['mediaSessionId'])[0]){ 
+        setMediaPlaybackPause(getTrackData(['sessionId'])[0], getTrackData(['mediaSessionId'])[0])
+    }
 }
 
 def stop() {
-    logger('debug', "Executing 'stop'")
-    def trackData = getTrackData(['sessionId'])
-    if(trackData["sessionId"]) { setDevicePlaybackStop(trackData["sessionId"]) }
+    logger('debug', "Executing 'stop', trackData: " + trackData)
+    if(trackData["sessionId"]) { setDevicePlaybackStop( getTrackData(["sessionId"])[0] ) }
 }
 
 def nextTrack() {
@@ -349,7 +340,6 @@ def setDefaultPresetObject() {
 
 def playPreset(number) {
     logger('debug', "Executing 'playPreset': "+number)
-    sendEvent(name: "lastPresetPlayed", value: number)
     
     def presets, preset, mediaType, mediaUrl, streamType, mediaTitle, mediaSubtitle, mediaImageUrl
     try {
@@ -594,8 +584,7 @@ def parseMediaStatus(mediaStatus) {
 }
 
 def generateTrackDescription() { //used to be: updateAttributesTrack
-    def trackData = getTrackData( ['displayName', 'title', 'subtitle'] )
-    def trackDescription = trackData["displayName"] +"\n"+ trackData["title"] +"\n"+ trackData["subtitle"]
+    def trackDescription = getTrackData(["displayName"])[0] +"\n"+ getTrackData(["title"])[0] +"\n"+ getTrackData(["subtitle"])[0]
     
     logger('debug', "Executing 'generateTrackDescription', trackDescription: "+ trackDescription)
     sendEvent(name: "trackDescription", value: trackDescription, displayed:false)
@@ -604,48 +593,34 @@ def generateTrackDescription() { //used to be: updateAttributesTrack
 def setTrackData(newTrackData) {
     JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "" )
     logger('debug', "currentTrackData: "+currentTrackData+", newTrackData: "+newTrackData)
+    def changed = false
     
-    if(newTrackData['title']) {
-        currentTrackData.put("title", newTrackData['title'])
-    }
-    if(newTrackData['subtitle']) {
-        currentTrackData.put("subtitle", newTrackData['subtitle'])
-    }
-    if(newTrackData['sessionId']) {
-        currentTrackData.put("sessionId", newTrackData['sessionId'])
-    }
-    if(newTrackData['mediaSessionId']) {
-        currentTrackData.put("mediaSessionId", newTrackData['mediaSessionId'])
-    }
-    if(newTrackData['displayName']) {
-        currentTrackData.put("displayName", newTrackData['displayName'])
+    newTrackData.each { key, value ->
+        if(key=='title'||key=='subtitle'||key=='sessionId'||key=='mediaSessionId'||key=='displayName') {
+            if(currentTrackData.has(key)) {
+                if(currentTrackData.get(key)==value) { return }
+            }
+            currentTrackData.put(key, value); changed=true;
+        }
     }
     
-    logger('debug', "sendEvent trackdata, currentTrackData: "+currentTrackData)
-    sendEvent(name: "trackData", value: currentTrackData, displayed:false)
+    if(changed){
+        logger('debug', "sendEvent trackdata, currentTrackData: "+currentTrackData)
+        sendEvent(name: "trackData", value: currentTrackData, displayed:false)
+    }
 }
 
 def getTrackData(keys) {
-    def returnValues = [:]
+    def returnValues = []
     logger('debug', "getTrackData, keys: "+keys)
     JSONObject trackData = new JSONObject( device.currentValue("trackData") )
     
     keys.each {
-        if( it.equals("title") ) {
-            returnValues.put( "title", trackData.optString("title", "--") ) //DOESNT WORK COZ DOCS SUCK
-        }
-        if( it.equals('subtitle') ) {
-            returnValues.put( "subtitle", trackData.optString("subtitle", "--") )
-        }
-        if( it.equals('displayName') ) {
-            returnValues.put( "displayName", trackData.optString("displayName", "Ready to cast") )
-        }
-        if( it.equals('sessionId') ) {
-            returnValues.put( "sessionId", trackData.optString("sessionId", null) )
-        }
-        if( it.equals('mediaSessionId') ) {
-            returnValues.put( "mediaSessionId", trackData.optString("mediaSessionId", null) )
-        }
+        def defaultValue = null
+        if( it.equals('title') || it.equals('subtitle') ) { defaultValue="--" }
+        if( it.equals('displayName') ) { defaultValue="--" }
+        
+        returnValues.add( trackData.optString(it, defaultValue) )
     }
     
     return returnValues
