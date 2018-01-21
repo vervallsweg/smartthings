@@ -217,9 +217,8 @@ def restartPolling() {
 
 // parse events into attributes
 def parse(String description) {
-    logger('debug', "'parse', parsing: '${description}'")
-    
     try {
+        logger('debug', "'parse', parsing: '${description}'")
         def msg = parseLanMessage(description)
         logger('debug', 'parse, msg.json: ' + msg.json)
         
@@ -256,8 +255,8 @@ def pause() {
 }
 
 def stop() {
-    logger('debug', "Executing 'stop', trackData: " + trackData)
-    if(trackData["sessionId"]) { setDevicePlaybackStop( getTrackData(["sessionId"])[0] ) }
+    logger('debug', "Executing 'stop'")
+    if(getTrackData(['sessionId'])[0]){ setDevicePlaybackStop(getTrackData(['sessionId'])[0]) }
 }
 
 def nextTrack() {
@@ -518,7 +517,9 @@ def parseMediaStatus(mediaStatus) {
         if(mediaStatus.playerState) {
             if( mediaStatus.playerState[0] ) {
                 logger('debug', "mediaStatus.playerState: "+mediaStatus.playerState[0].toLowerCase())
-                sendEvent(name: "status", value: mediaStatus.playerState[0].toLowerCase(), changed: true)
+                if( mediaStatus.playerState[0].toLowerCase().equals("playing") || mediaStatus.playerState[0].toLowerCase().equals("paused") ) {
+                    sendEvent(name: "status", value: mediaStatus.playerState[0].toLowerCase(), changed: true)
+                }
             }
         }
         
@@ -618,7 +619,7 @@ def getTrackData(keys) {
     keys.each {
         def defaultValue = null
         if( it.equals('title') || it.equals('subtitle') ) { defaultValue="--" }
-        if( it.equals('displayName') ) { defaultValue="--" }
+        if( it.equals('displayName') ) { defaultValue="Ready to cast" }
         
         returnValues.add( trackData.optString(it, defaultValue) )
     }
