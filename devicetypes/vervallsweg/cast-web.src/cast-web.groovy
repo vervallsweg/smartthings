@@ -161,14 +161,14 @@ def installed() {
     //Presets, tiles
     sendEvent(name: "dni", value: device.deviceNetworkId, displayed: false)
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
-    setDefaultPresets()
+    parsePresets()
 }
 
 def updated() {
     logger('debug', "Executing 'updated'")
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
     
-    setDefaultPresets()
+    parsePresets()
     restartPolling()
 }
 
@@ -303,37 +303,33 @@ def restoreTrack(trackToSet) {
     return playTrack(trackToSet)
 }
 
-def setDefaultPresets() {
-    def p1 = "Preset 1", p2 = "Preset 2", p3 = "Preset 3", p4 = "Preset 4", p5 = "Preset 5", p6 = "Preset 6", presets
-    if(getDataValue("presetObject")) {
-        try {
-            presets = parseJson(getDataValue("presetObject"))
-        } catch (Exception e) {
-            logger('debug', "Cannot parse JSON: " + e)
-            setDefaultPresetObject()
-        }
-        
-        try{p1=presets.preset1.mediaTitle}catch(Exception e){logger('debug', "Preset 1 not set")}
-        try{p2=presets.preset2.mediaTitle}catch(Exception e){logger('debug', "Preset 2 not set")}
-        try{p3=presets.preset3.mediaTitle}catch(Exception e){logger('debug', "Preset 3 not set")}
-        try{p4=presets.preset4.mediaTitle}catch(Exception e){logger('debug', "Preset 4 not set")}
-        try{p5=presets.preset5.mediaTitle}catch(Exception e){logger('debug', "Preset 5 not set")}
-        try{p6=presets.preset6.mediaTitle}catch(Exception e){logger('debug', "Preset 6 not set")}
-        
-    } else {
+def parsePresets() { //was: setDefaultPresets
+    if( !getDataValue("presetObject") ) { setDefaultPresetObject() }
+    
+    try {
+        JSONObject testPresets = new JSONObject( getDataValue("presetObject") )
+    } catch (Exception e) {
+        logger('debug', "parsePresets() cannot parse JSON testPresets exception: " + e)
         setDefaultPresetObject()
     }
-    sendEvent(name: "preset1Name", value: p1, displayed: false)
-    sendEvent(name: "preset2Name", value: p2, displayed: false)
-    sendEvent(name: "preset3Name", value: p3, displayed: false)
-    sendEvent(name: "preset4Name", value: p4, displayed: false)
-    sendEvent(name: "preset5Name", value: p5, displayed: false)
-    sendEvent(name: "preset6Name", value: p6, displayed: false)
+    
+    JSONObject presets = new JSONObject( getDataValue("presetObject") )
+    
+    for(int i=0; i<presets.length(); i++) {
+        def key = "preset"+(i+1)
+        def mediaTitle = "Preset "+(i+1)
+        try {
+            mediaTitle = presets.get(key).get('mediaTitle')
+        } catch (Exception e) {
+            logger('debug', mediaTitle+" not set.")
+        }
+        logger('warn', "parsePresets i: "+i+", key: "+key+", mediaTitle: "+mediaTitle)
+        sendEvent(name: key+"Name", value: mediaTitle, displayed: false)
+    }
 }
 
 def setDefaultPresetObject() {
     def defaultObject = '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}'
-    logger('debug', "DO: " + defaultObject)
     updateDataValue("presetObject", defaultObject)
 }
 
