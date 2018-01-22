@@ -19,9 +19,9 @@ definition(
     author: "Tobias Haerke",
     description: "Syncs the music playback on a Cast audio group, accessed through a web API.",
     category: "Convenience",
-    iconUrl: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
-    iconX2Url: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
-    iconX3Url: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png")
+    iconUrl: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_speaker_group_grey_24px.png",
+    iconX2Url: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_speaker_group_grey_24px.png",
+    iconX3Url: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_speaker_group_grey_24px.png")
 
 
 preferences {
