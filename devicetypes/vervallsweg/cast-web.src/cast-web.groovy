@@ -529,15 +529,19 @@ def parseReceiverStatus(deviceStatus) {
             if(deviceStatus.applications.sessionId) {
                 if(deviceStatus.applications.sessionId[0]){
                     logger('debug', "Receiver has sessionId: " + deviceStatus.applications.sessionId[0])
-                    setTrackData([ "sessionId":deviceStatus.applications.sessionId[0] ])
-                    getMediaStatus(deviceStatus.applications.sessionId[0]) // TODO: optional parameter sessionId 
+                    if( !device.currentValue("status").equals('group') ) {
+                        setTrackData([ "sessionId":deviceStatus.applications.sessionId[0] ])
+                        getMediaStatus(deviceStatus.applications.sessionId[0])
+                    }
                 } else { removeTrackData(['title', 'subtitle', 'displayName', 'sessionId', 'mediaSessionId', 'preset']) }
             } else { removeTrackData(['title', 'subtitle', 'displayName', 'sessionId', 'mediaSessionId', 'preset']) }
             
             if(deviceStatus.applications.displayName) {
                 if(deviceStatus.applications.displayName[0]) {
                     logger('debug', "Receiver application running, displayName: "+deviceStatus.applications.displayName[0])
-                    setTrackData([ "displayName":deviceStatus.applications.displayName[0] ])
+                    if( !device.currentValue("status").equals('group') ) {
+                        setTrackData([ "displayName":deviceStatus.applications.displayName[0] ])
+                    }
                 } else { removeTrackData(['displayName']) }
             } else { removeTrackData(['displayName']) }
         } else { removeTrackData(['title', 'subtitle', 'displayName', 'sessionId', 'mediaSessionId', 'preset']) }
