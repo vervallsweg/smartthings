@@ -43,7 +43,6 @@ metadata {
         command "preset5"
         command "preset6"
         command "playPreset", ["number"]
-        //command "off"
         command "playText", ["string"]
         command "playText", ["string", "number"]
         command "playTextAndResume", ["string"]
@@ -51,7 +50,7 @@ metadata {
         command "playTextAndRestore", ["string"]
         command "playTextAndRestore", ["string", "number"]
         command "restartPolling"
-        command "updateAttributesMedia"
+        command "setGroupPlayback", ["boolean"]
     }
 
     simulator {
@@ -64,12 +63,12 @@ metadata {
                 attributeState("paused", label:"Paused", icon:"st.sonos.pause-icon")
                 attributeState("playing", label:"Playing", icon:"st.sonos.play-icon", backgroundColor:"#00a0dc")
                 attributeState("Ready to cast", label:"Ready to cast")
-                attributeState("group", label:"Group playback", icon:"st.sonos.play-icon", backgroundColor:"#00a0dc")
+                attributeState("group", label:"Group playback", backgroundColor:"#00a0dc")
             }
             tileAttribute("device.status", key: "MEDIA_STATUS") {
                 attributeState("paused", label:"Paused", icon:"st.sonos.pause-icon", action:"music Player.play", nextState: "playing")
                 attributeState("playing", label:"Playing", icon:"st.sonos.play-icon", action:"music Player.pause", nextState: "paused", backgroundColor:"#00a0dc")
-                attributeState("Ready to cast", label:"Ready to cast", action:"refresh", nextState: "Ready to cast")
+                attributeState("Ready to cast", label:"Ready")
                 attributeState("group", label:"Group", icon:"st.sonos.play-icon", backgroundColor:"#00a0dc")
             }
             tileAttribute("device.status", key: "PREVIOUS_TRACK") {
@@ -98,7 +97,7 @@ metadata {
             state "val", label: '', action: "music Player.stop", icon: "st.sonos.stop-btn", backgroundColor: "#ffffff", defaultState: true
         }
         
-        valueTile("deviceNetworkId", "device.dni", width: 2, height: 1) { //TODO: Move to settings
+        valueTile("deviceNetworkId", "device.dni", width: 2, height: 1) {
             state "val", label:'${currentValue}', defaultState: true
         }
         
@@ -152,7 +151,6 @@ metadata {
 }
 
 // Device handler states
-
 def installed() {
     logger('debug', "Executing 'installed'")
     
@@ -187,8 +185,8 @@ def poll() {
         logger('error', "poll(), state.badResponseCounter > 4")
         return stopPolling()
     }
-    if(device.currentValue("trackDataTitle")=="Group playback") {
-        logger('debug', "poll(), 'trackDataTitle' == Group playback")
+    if( device.currentValue("status").equals("group") ) {
+        logger('debug', "poll(), 'status' is group")
         return stopPolling()
     } else {
         return refresh()
@@ -552,69 +550,62 @@ def parseReceiverStatus(deviceStatus) {
 def parseMediaStatus(mediaStatus) {
     logger('debug', "Executing 'parseMediaStatus', mediaStatus: "+mediaStatus)
     
-    if(mediaStatus.playerState) { //JSON on group playback = "status": []
-        parsePlayerState(mediaStatus.playerState)
+    parsePlayerState(mediaStatus.playerState)
         
-        if(mediaStatus.media) {
-            if(mediaStatus.media.metadata) {
-                if(mediaStatus.media.metadata.metadataType) {
-                    if(mediaStatus.media.metadata.metadataType[0]==0||mediaStatus.media.metadata.metadataType[0]==1) {
-                        if(mediaStatus.media.metadata[0].title) {
-                            logger('debug', 'mediaStatus.media.metadata[0].title: ' +mediaStatus.media.metadata[0].title)
-                            setTrackData( ["title":mediaStatus.media.metadata[0].title] )
-                        } else { removeTrackData(['title']) }
-                        
-                        if(mediaStatus.media.metadata[0].subtitle) {
-                            logger('debug', 'mediaStatus.media.metadata[0].subtitle: ' +mediaStatus.media.metadata[0].subtitle)
-                            setTrackData( ["subtitle":mediaStatus.media.metadata[0].subtitle] )
-                            if(getTrackData(['displayName'])[0].equals("Ready to cast") && isPreset(mediaStatus.media.metadata[0].subtitle)) { //if is preset and no displayname > refresh device status
-                                logger('warn', 'Preset playing and no receiver status, getDeviceStatus() called!')
-                                getDeviceStatus()
-                            }
-                        } else { removeTrackData(['subtitle', 'preset']) }
-                    }
-                        
-                    else if(mediaStatus.media.metadata.metadataType[0]==2) {
-                        if(mediaStatus.media.metadata[0].seriesTitle) {
-                            logger('debug', 'mediaStatus.media.metadata[0].seriesTitle: ' +mediaStatus.media.metadata[0].seriesTitle)
-                            setTrackData( ["title":mediaStatus.media.metadata[0].seriesTitle] )
-                        } else { removeTrackData(['title']) }
-                        
-                        if(mediaStatus.media.metadata[0].subtitle) {
-                            logger('debug', 'mediaStatus.media.metadata[0].subtitle: ' +mediaStatus.media.metadata[0].subtitle)
-                            setTrackData( ["subtitle":mediaStatus.media.metadata[0].subtitle] )
-                        } else { removeTrackData(['subtitle', 'preset']) }
-                    }
-                   
-                    else if(mediaStatus.media.metadata.metadataType[0]==3||mediaStatus.media.metadata.metadataType[0]==4) {
-                        if(mediaStatus.media.metadata[0].title) {
-                            logger('debug', 'mediaStatus.media.metadata[0].title: ' +mediaStatus.media.metadata[0].title)
-                            setTrackData( ["title":mediaStatus.media.metadata[0].title] )
-                        } else { removeTrackData(['title']) }
-                        if(mediaStatus.media.metadata[0].artist) {
-                            logger('debug', 'mediaStatus.media.metadata[0].artist: ' +mediaStatus.media.metadata[0].artist)
-                            setTrackData( ["subtitle":mediaStatus.media.metadata[0].artist] )
-                        } else { removeTrackData(['subtitle', 'preset']) }
-                    }
-                    
-                    else { removeTrackData(['title', 'subtitle', 'preset']) }
-                    
-                } else { removeTrackData(['title', 'subtitle', 'preset']) }
+    if(mediaStatus.media) {
+        if(mediaStatus.media.metadata) {
+            if(mediaStatus.media.metadata.metadataType) {
+                if(mediaStatus.media.metadata.metadataType[0]==0||mediaStatus.media.metadata.metadataType[0]==1) {
+                    if(mediaStatus.media.metadata[0].title) {
+                        logger('debug', 'mediaStatus.media.metadata[0].title: ' +mediaStatus.media.metadata[0].title)
+                        setTrackData( ["title":mediaStatus.media.metadata[0].title] )
+                    } else { removeTrackData(['title']) }
+
+                    if(mediaStatus.media.metadata[0].subtitle) {
+                        logger('debug', 'mediaStatus.media.metadata[0].subtitle: ' +mediaStatus.media.metadata[0].subtitle)
+                        setTrackData( ["subtitle":mediaStatus.media.metadata[0].subtitle] )
+                        if(getTrackData(['displayName'])[0].equals("Ready to cast") && isPreset(mediaStatus.media.metadata[0].subtitle)) { //if is preset and no displayname > refresh device status
+                            logger('warn', 'Preset playing and no receiver status, getDeviceStatus() called!')
+                            getDeviceStatus()
+                        }
+                    } else { removeTrackData(['subtitle', 'preset']) }
+                }
+
+                else if(mediaStatus.media.metadata.metadataType[0]==2) {
+                    if(mediaStatus.media.metadata[0].seriesTitle) {
+                        logger('debug', 'mediaStatus.media.metadata[0].seriesTitle: ' +mediaStatus.media.metadata[0].seriesTitle)
+                        setTrackData( ["title":mediaStatus.media.metadata[0].seriesTitle] )
+                    } else { removeTrackData(['title']) }
+
+                    if(mediaStatus.media.metadata[0].subtitle) {
+                        logger('debug', 'mediaStatus.media.metadata[0].subtitle: ' +mediaStatus.media.metadata[0].subtitle)
+                        setTrackData( ["subtitle":mediaStatus.media.metadata[0].subtitle] )
+                    } else { removeTrackData(['subtitle', 'preset']) }
+                }
+
+                else if(mediaStatus.media.metadata.metadataType[0]==3||mediaStatus.media.metadata.metadataType[0]==4) {
+                    if(mediaStatus.media.metadata[0].title) {
+                        logger('debug', 'mediaStatus.media.metadata[0].title: ' +mediaStatus.media.metadata[0].title)
+                        setTrackData( ["title":mediaStatus.media.metadata[0].title] )
+                    } else { removeTrackData(['title']) }
+                    if(mediaStatus.media.metadata[0].artist) {
+                        logger('debug', 'mediaStatus.media.metadata[0].artist: ' +mediaStatus.media.metadata[0].artist)
+                        setTrackData( ["subtitle":mediaStatus.media.metadata[0].artist] )
+                    } else { removeTrackData(['subtitle', 'preset']) }
+                }
+
+                else { removeTrackData(['title', 'subtitle', 'preset']) }
+
             } else { removeTrackData(['title', 'subtitle', 'preset']) }
         } else { removeTrackData(['title', 'subtitle', 'preset']) }
+    } else { removeTrackData(['title', 'subtitle', 'preset']) }
 
-        if(mediaStatus.mediaSessionId){
-            if(mediaStatus.mediaSessionId[0]) {
-                logger('debug', "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId[0])
-                setTrackData( ["mediaSessionId":mediaStatus.mediaSessionId[0]] )
-            } else { removeTrackData(['mediaSessionId']) }
+    if(mediaStatus.mediaSessionId){
+        if(mediaStatus.mediaSessionId[0]) {
+            logger('debug', "mediaStatus.mediaSessionId: "+mediaStatus.mediaSessionId[0])
+            setTrackData( ["mediaSessionId":mediaStatus.mediaSessionId[0]] )
         } else { removeTrackData(['mediaSessionId']) }
-    }
-    
-    if(!mediaStatus.playerState) {
-        logger('debug', "mediaStatus.playerState not set, probably group playback") //TODO: setGroupPlayback
-        /*sendEvent(name: "status", value: "group");*/
-    }
+    } else { removeTrackData(['mediaSessionId']) }
     
     generateTrackDescription()
     generateSwitchStatus()
@@ -656,6 +647,21 @@ def setTrackData(newTrackData) {
     }
 }
 
+def setGroupPlayback(boolean group) {
+    if(group) {
+        setTrackData([ "title":"Group playback", "subtitle":"Group playback", "displayName":"Group playback" ])
+        removeTrackData( ['preset', 'sessionId', 'mediaSessionId'] )
+        sendEvent(name: "status", value: 'group', displayed:false, changed: true)
+    } else {
+        removeTrackData(['title', 'subtitle', 'displayName', 'sessionId', 'mediaSessionId', 'preset'])
+        sendEvent(name: "status", value: 'Ready to cast', displayed:false, changed: true)
+        refresh()
+        restartPolling()
+    }
+    generateTrackDescription()
+    generateSwitchStatus()
+}
+
 def getTrackData(keys) {
     def returnValues = []
     logger('debug', "getTrackData, keys: "+keys)
@@ -688,15 +694,19 @@ def removeTrackData(keys) {
 def generateSwitchStatus() {
     logger('debug', "Executing 'generateSwitchStatus', length:" + device.currentValue('trackData').length() )
     
-    if( device.currentValue('trackData').length()>2 && device.currentValue('status').equals("playing") ) {
+    if( device.currentValue('trackData').length()>2 && device.currentValue('status').equals("playing") ) { //TODO: handle 'group' status
         logger('debug', "generateSwitchStatus, playing")
         sendEvent(name: "switch", value: on)
     } else if( device.currentValue('trackData').length()>2 && device.currentValue('status').equals("paused") ) {
         logger('debug', "generateSwitchStatus, paused")
         sendEvent(name: "switch", value: off)
+    } else if ( getTrackData(['title'])[0].equals('Group playback') && device.currentValue('status').equals("group") ) {
+        logger('debug', "generateSwitchStatus, group")
+        sendEvent(name: "switch", value: on)
     } else {
         logger('debug', "generateSwitchStatus, nothing playing")
-        sendEvent(name: "status", value: "Ready to cast")
+        sendEvent(name: "status", value: "Ready to cast", changed: true)
+        sendEvent(name: "switch", value: off)
     }
 }
 
