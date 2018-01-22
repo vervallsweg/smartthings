@@ -19,9 +19,9 @@ definition(
     author: "Tobias Haerke",
     description: "Connect your Cast devices through the Cast web API to SmartThings.",
     category: "SmartThings Labs",
-    iconUrl: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_cast_grey_24dp.png",
-    iconX2Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_cast_grey_24dp.png",
-    iconX3Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_cast_grey_24dp.png") {
+    iconUrl: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_cast_grey_24dp.png",
+    iconX2Url: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_cast_grey_24dp.png",
+    iconX3Url: "https://github.com/vervallsweg/smartthings/raw/master/icn/ic_cast_grey_24dp.png") {
     appSetting "api"
 }
 
