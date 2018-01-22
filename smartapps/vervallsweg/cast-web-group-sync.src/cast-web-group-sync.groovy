@@ -1,5 +1,5 @@
 /**
- *  Cast web - group sync
+ *  cast web - group sync
  *
  *  Copyright 2017 Tobias Haerke
  *
@@ -19,9 +19,9 @@ definition(
     author: "Tobias Haerke",
     description: "Syncs the music playback on a Cast audio group, accessed through a web API.",
     category: "Convenience",
-    iconUrl: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
-    iconX2Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
-    iconX3Url: "https://github.com/vervallsweg/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png")
+    iconUrl: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
+    iconX2Url: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png",
+    iconX3Url: "https://github.com/smartthings/cast-web-api/raw/master/icn/ic_speaker_group_grey_24px.png")
 
 
 preferences {
@@ -34,33 +34,32 @@ preferences {
 }
 
 def installed() {
-	log.debug "Installed with settings: ${settings}"
+    log.debug "Installed with settings: ${settings}"
 
-	initialize()
+    initialize()
 }
 
 def updated() {
-	log.debug "Updated with settings: ${settings}"
+    log.debug "Updated with settings: ${settings}"
 
-	unsubscribe()
-	initialize()
+    unsubscribe()
+    initialize()
 }
 
 def initialize() {
-	// TODO: subscribe to attributes, devices, locations, etc.
+    state.lastStatus = ""
     setLabel()
-    subscribe(theAudioGroup, "status", groupStatusUpdated)
-   	subscribe(theAudioGroup, "getDeviceStatus", groupStatusUpdated)
+    subscribe(theAudioGroup, "status", groupStatusUpdated) //only subscribes to status==play&&status==pause
+    subscribe(theAudioGroup, "getDeviceStatus", groupStatusUpdated)
     subscribe(app, syncVolume)
 }
 
 def setLabel() {
-	if(app.label=="Cast web - group sync") {
-    	if(theAudioGroup.label) {
-        	log.debug "Changing label to: " + theAudioGroup.label
+    if(app.label=="Google cast web - group sync") {
+        if(theAudioGroup.label) {
+            log.debug "Changing label to: " + theAudioGroup.label
             app.updateLabel(theAudioGroup.label)
         }
-    	
     }
 }
 
@@ -70,31 +69,30 @@ def syncVolume(evt) {
     log.debug "masterVolume: " + masterVolume
     
     theMembers.each{
-      	it.setLevel(masterVolume)
+        it.setLevel(masterVolume)
     }
-    
-    runIn(10, groupStatusUpdated)
+    //runIn(10, groupStatusUpdated) //WTF?
 }
 
 def groupStatusUpdated(evt) {
-	log.debug "groupStatusUpdated called"
+    log.debug "groupStatusUpdated called, theAudioGroup.currentState('status').value: " + theAudioGroup.currentState("status").value
     
-    theMembers.each{
-    	log.debug "theAudioGroup.currentState('getDeviceStatus').value: " + theAudioGroup.currentState("getDeviceStatus").value
-        log.debug "theAudioGroup.currentState('status').value " + theAudioGroup.currentState("status").value
-        
-        if(theAudioGroup.currentState("status").value == "playing" || theAudioGroup.currentState("status").value == "paused") {
-        	log.debug "Setting group for: " + it.name
-            def jsonData = parseJson("{}")
-            log.debug "jsonData: " + jsonData
-            it.updateAttributesMedia(jsonData)
+    if( theAudioGroup.currentState("status").value.equals("playing") || theAudioGroup.currentState("status").value.equals("paused") ) {
+        state.lastStatus = ""
+        theMembers.each {
+            if( !it.currentState("status").value.equals("group") ) {
+                log.warn "setGroupPlayback(true) calling on it: " + it
+                it.setGroupPlayback(true)
+            }   
         }
-        if(theAudioGroup.currentState("status").value == "Ready to cast") {
-        	log.warn "restartPolling"
-            it.refresh()
-        	it.restartPolling()
+    }
+    if( theAudioGroup.currentState("status").value.equals("Ready to cast") ) {
+        if( !state.lastStatus.equals("Ready to cast") ) {
+            log.warn "setGroupPlayback(false) calling on theMembers.each"
+            state.lastStatus = "Ready to cast"
+            theMembers.each {
+                it.setGroupPlayback(false)
+            }
         }
     }
 }
-
-// TODO: implement event handlers
