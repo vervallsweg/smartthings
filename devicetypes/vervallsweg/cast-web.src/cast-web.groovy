@@ -475,7 +475,7 @@ def playTrack(uri, level = 0, thirdValue = 0) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level)
 
     if (level!=0&&level!=null) { setLevel(level) }
-    return setMediaPlayback('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
+    return setMediaPlaybackShort('audio/mp3', uri, 'BUFFERED', 'SmartThings', 'SmartThings playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300')
 }
 
 def playTrackAndResume(uri, level = 0) {
@@ -754,6 +754,12 @@ def setDevicePlaybackStop(sessionId) {
 def setMediaPlayback(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
     logger('debug', "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
     sendHttpRequest(getDataValue('apiHost'), '/setMediaPlayback?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&mediaUrl='+mediaUrl+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
+}
+
+def setMediaPlaybackShort(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
+    sendEvent(name: "status", value: "playing", changed: true)
+    logger('debug', "Executing 'setMediaPlaybackShort'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
+    sendHttpRequest(getDataValue('apiHost'), '/setMediaPlaybackShort?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&mediaUrl='+mediaUrl+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
 }
 
 // NETWORKING STUFF
