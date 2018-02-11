@@ -433,7 +433,7 @@ def parse(description) {
 
 //UPDATE
 def getThisVersion() {
-    return 0.1
+    return 0.2
 }
 
 def getLatestVersion() {
