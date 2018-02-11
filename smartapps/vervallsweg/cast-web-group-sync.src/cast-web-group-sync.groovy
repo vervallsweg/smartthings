@@ -31,6 +31,9 @@ preferences {
     section("Members of this group") {
         input "theMembers", "capability.musicPlayer", required: true, multiple: true, title: "Members of this group"
     }
+    section("Version info") {
+        paragraph "This version: " + getThisVersion() + ", latest: " + getLatestVersion()
+    }
 }
 
 def installed() {
@@ -94,5 +97,28 @@ def groupStatusUpdated(evt) {
                 it.setGroupPlayback(false)
             }
         }
+    }
+}
+
+def getThisVersion() {
+    return 0.2
+}
+
+def getLatestVersion() {
+    try {
+        httpGet([uri: "https://raw.githubusercontent.com/vervallsweg/smartthings/master/smartapps/vervallsweg/cast-web-group-sync.src/version.json"]) { resp ->
+            log.debug "getLatestVersion(), response status: " + resp.status
+            String data = "${resp.getData()}"
+            log.debug "getLatestVersion(), data: " + data
+            
+            if(resp.status==200 && data!=null) {
+                return parseJson(data).version
+            } else {
+                return null
+            }
+        }
+    } catch (e) {
+        log.error "getLatestVersion(), something went wrong: " + e
+        return null
     }
 }
