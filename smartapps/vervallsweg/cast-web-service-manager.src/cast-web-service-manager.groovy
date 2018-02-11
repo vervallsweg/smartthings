@@ -32,6 +32,7 @@ preferences {
     page(name: "discoveryPage")
     page(name: "addDevicesPage")
     page(name: "healthCheckPage")
+    page(name: "manualHealthCheck")
     page(name: "configureDevicePage")
     page(name: "saveDeviceConfigurationPage")
     page(name: "updateApiHostPage")
@@ -63,7 +64,7 @@ def mainPage() {
 
 def checkApiConnectionPage() {
     dynamicPage(name:"checkApiConnectionPage", title:"Test API connection", nextPage: "mainPage", refreshInterval:10) {
-        getDevices()
+        getDevices() //TODO: get root and only check status
         log.debug "refresh"
         
         section("Please wait for the API to answer, this might take a couple of seconds.") {
@@ -150,7 +151,7 @@ def updateDeviceAddresses() {
     deviceMap.each { key, value ->
         log.debug "Selected device address: " + key + ", DNI: " + value
         def d = getChildDevices()?.find { it.deviceNetworkId == value }
-        //REALY bad temporary fix to deal with dealing group ids
+        //REALY bad temporary fix to deal with changing group ids
         if(!d) {
             d = getChildDevices()?.find { it.deviceNetworkId == flipCastId(value) }
             if(d) {
@@ -278,21 +279,36 @@ def healthCheck() {
 
 def healthCheckPage() {
     def latestUpdatedDevicesMap = state.latestUpdatedDevicesMap
+    def latestDevicesNameMap = state.latestDevicesNameMap
     def lastRunAt = state.latestUpdatedDevicesTime
     def title
+    
+    log.debug "state.latestUpdatedDevicesTime: "+state.latestUpdatedDevicesTime+", latestDevicesNameMap: " + latestDevicesNameMap
     
     if(lastRunAt+1200>getTimeStamp()) {title="Health check in progress"} else {title="Health check not running"}
     
     dynamicPage(name: "healthCheckPage", title: title, nextPage: "mainPage") {
         section("Latest health check at") {
             paragraph "" + getTimeStringFromEpoch(lastRunAt)
+            href "manualHealthCheck", title: "Run now", description:""
         }
         section("Result of the latest health check (every 15 minutes)") {
             if(latestUpdatedDevicesMap==null|| latestUpdatedDevicesMap==[:]) {
                 paragraph "Nothing changed"
             } else {
-                paragraph "" + latestUpdatedDevicesMap
+                latestUpdatedDevicesMap.each{ key, value ->
+                    paragraph title: getChildDevices()?.find { it.deviceNetworkId == key }.label, "ID: "+key+", "+value
+                }
             }
+        }
+    }
+}
+
+def manualHealthCheck() {
+    dynamicPage(name: "manualHealthCheck", title: "Restart health check", nextPage: null, install: true) {
+        healthCheck()
+        section("Click save for health check") {
+            paragraph "Service manager will close and conduct a manual health check."
         }
     }
 }
@@ -363,7 +379,7 @@ def getTimeStamp() {
 
 def getTimeStringFromEpoch(epoch) {
     long ep = (long) epoch;
-    return new Date(ep).toString()
+    return new Date(ep*1000).toString()
 }
 
 def getDevices() {
