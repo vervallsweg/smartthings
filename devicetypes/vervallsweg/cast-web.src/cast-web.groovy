@@ -632,7 +632,7 @@ def generateTrackDescription() { //used to be: updateAttributesTrack
 }
 
 def setTrackData(newTrackData) {
-    JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "" )
+    JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     logger('debug', "currentTrackData: "+currentTrackData+", newTrackData: "+newTrackData)
     def changed = false
     
