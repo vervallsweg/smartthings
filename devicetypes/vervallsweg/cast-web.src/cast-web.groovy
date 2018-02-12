@@ -669,7 +669,7 @@ def setGroupPlayback(boolean group) {
 def getTrackData(keys) {
     def returnValues = []
     logger('debug', "getTrackData, keys: "+keys)
-    JSONObject trackData = new JSONObject( device.currentValue("trackData") )
+    JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     
     keys.each {
         def defaultValue = null
@@ -683,7 +683,7 @@ def getTrackData(keys) {
 }
 
 def removeTrackData(keys) {
-    JSONObject trackData = new JSONObject( device.currentValue("trackData") )
+    JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     keys.each{
         if( trackData.has( it ) ) {
             if( it.equals('preset') ) { resetPresetName( getTrackData(['preset'])[0] ) }
