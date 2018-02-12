@@ -1,4 +1,11 @@
 # Changelog
+## Version 0.2
+- DTH is now aware of which preset is currently playing
+- Indicators for the currently playing presets
+- Next/prev buttons can now swich presets accordingly
+- Short media files, like ST notifications will not cause device reset anymore
+- Optimized all parsing methods
+- Cleaned device events to minimum required 
 ## Version 0.1
 - Check for updates on every device page
 - SmartThings GitHub integration
