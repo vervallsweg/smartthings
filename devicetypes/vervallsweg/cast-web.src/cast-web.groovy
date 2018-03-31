@@ -442,14 +442,14 @@ def off() {
 
 def speak(phrase) {
     //def sound = textToSpeech(phrase, true)
-    return playTrack( textToSpeech(phrase, true).uri )
+    return playText( phrase )
 }
 //AUDIO NOTIFICATION, TEXT
 def playText(message, level = 0) {
     logger('info', "playText, message: " + message + " level: " + level)
     
     if (level!=0&&level!=null) { setLevel(level) }
-    return speak(message)
+    setSpeakMedia('audio/mp3', message, 'BUFFERED', 'SmartThings', 'SmartThings playback', 'https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300');
 }
 
 def playTextAndResume(message, level = 0, thirdValue = 0) {
@@ -754,6 +754,11 @@ def setDevicePlaybackStop(sessionId) {
 def setMediaPlayback(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
     logger('debug', "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
     sendHttpRequest(getDataValue('apiHost'), '/setMediaPlayback?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&mediaUrl='+mediaUrl+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
+}
+
+def setSpeakMedia(mediaType, text, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
+    logger('debug', "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
+    sendHttpRequest(getDataValue('apiHost'), '/speak?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&text='+text+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
 }
 
 def setMediaPlaybackShort(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
