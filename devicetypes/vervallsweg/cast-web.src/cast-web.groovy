@@ -757,8 +757,8 @@ def setMediaPlayback(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubt
 }
 
 def setSpeakMedia(mediaType, text, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
-    logger('debug', "Executing 'setMediaPlayback'; mediaType: "+mediaType+" mediaUrl: "+mediaUrl+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
-    sendHttpRequest(getDataValue('apiHost'), '/speak?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&text='+text+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
+    logger('debug', "Executing 'setSpeakMedia'; mediaType: "+mediaType+" text: "+URLEncoder.encode(text)+" mediaStreamType: "+mediaStreamType+" mediaTitle: "+mediaTitle+" mediaSubtitle: "+mediaSubtitle+" mediaImageUrl: "+mediaImageUrl)
+    sendHttpRequest(getDataValue('apiHost'), '/speak?address='+getDataValue('deviceAddress')+'&mediaType='+mediaType+'&text='+URLEncoder.encode(text)+'&mediaStreamType='+mediaStreamType+'&mediaTitle='+urlEncode(mediaTitle)+'&mediaSubtitle='+urlEncode(mediaSubtitle)+'&mediaImageUrl='+mediaImageUrl)
 }
 
 def setMediaPlaybackShort(mediaType, mediaUrl, mediaStreamType, mediaTitle, mediaSubtitle, mediaImageUrl) {
