@@ -31,6 +31,12 @@ preferences {
     section("Members of this group") {
         input "theMembers", "capability.musicPlayer", required: true, multiple: true, title: "Members of this group"
     }
+    section("Auto Volume Level") {
+    	input "autoSync", "bool", title: "Auto Level Volume?", required: false, multiple: false, defaultValue: false
+    }
+    section("Volume Level Sync On Switches") {
+        input "volumeSwitches", "capability.switch", required: false, multiple: true, title: "Volume Sync Switches"
+    }
     section("Version info") {
         paragraph "This version: " + getThisVersion() + ", latest: " + getLatestVersion()
     }
@@ -54,7 +60,14 @@ def initialize() {
     setLabel()
     subscribe(theAudioGroup, "status", groupStatusUpdated) //only subscribes to status==play&&status==pause
     subscribe(theAudioGroup, "getDeviceStatus", groupStatusUpdated)
+    if(autoSync){
+    	subscribe(theAudioGroup, "level", syncVolume)
+	}
+	volumeSwitches.each {
+        subscribe(it, "switch.on", syncVolume)
+    }
     subscribe(app, syncVolume)
+
 }
 
 def setLabel() {
