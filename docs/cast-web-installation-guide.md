@@ -9,7 +9,9 @@
 
 Due to the limitations of the Smartthings platform all Google Cast requests (SOCKETS) need to be proxied through an HTTP server. This web API is written for node.js and should be running on your local network. A cloud installation is probably somehow possible, but not recommended!
 ## Setting up the API
-Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.  
+Install node.js, then install the API as described in the [documentation](https://github.com/vervallsweg/cast-web-api#installation "documentation"). Please make sure that the device running the API has a STATIC or fixed IP address. Otherwies you would have to go in to the service manager change the host IP and tap the update button everytime it changes.
+A video guide is available for Mac and Windows.
+<iframe width="560" height="315" src="https://www.youtube.com/embed/64768bRCAxM?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe><iframe width="560" height="315" src="https://www.youtube.com/embed/BGQhgSaAM0k" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 ## Installing the DTH and service manager
 <div class="ui small images">
   <img src="img/dth_steps/dth_step1.jpeg" onclick="showModal('img/dth_steps/dth_step1.jpeg')">
