@@ -25,20 +25,31 @@ definition(
 
 
 preferences {
+page(name: "settingsPage")
+}
+def settingsPage() {
+    dynamicPage(name: "settingsPage", title: "", install: true, uninstall: true) {
+
     section("Audio group") {
         input "theAudioGroup", "capability.musicPlayer", required: true, title: "Audio group", multiple: false
     }
     section("Members of this group") {
         input "theMembers", "capability.musicPlayer", required: true, multiple: true, title: "Members of this group"
     }
-    section("Version info") {
-        paragraph "This version: " + getThisVersion() + ", latest: " + getLatestVersion()
+    section("Auto Volume Level") {
+    	input "autoSync", "bool", title: "Auto Level Volume?", required: false, multiple: false, defaultValue: false
     }
+    section("Volume Level Sync On Switches") {
+        input "volumeSwitches", "capability.switch", required: false, multiple: true, title: "Volume Sync Switches"
+    }
+    section("Version info") {
+        paragraph "This version: " + getThisVersion() + ", latest: " + state.latestVersion
+    }
+	}
 }
 
 def installed() {
     log.debug "Installed with settings: ${settings}"
-
     initialize()
 }
 
@@ -50,11 +61,39 @@ def updated() {
 }
 
 def initialize() {
+	state.latestVersion = getLatestVersion()
     state.lastStatus = ""
     setLabel()
     subscribe(theAudioGroup, "status", groupStatusUpdated) //only subscribes to status==play&&status==pause
     subscribe(theAudioGroup, "getDeviceStatus", groupStatusUpdated)
-    subscribe(app, syncVolume)
+    if(autoSync){
+    	subscribe(theAudioGroup, "level", autoSyncHandler)
+	}
+	volumeSwitches.each {
+        subscribe(it, "switch.on", autoSyncHandler)
+    }
+    subscribe(app, autoSyncHandler)
+
+}
+
+def autoSyncHandler(evt) {
+	log.debug "app event (autoSyncVolume) ${evt.name}:${evt.value} received"
+	if(autoSync && volumeSwitches) {
+    	def currSwitches = volumeSwitches.currentSwitch
+
+    	def onSwitches = currSwitches.findAll { switchVal ->
+        	switchVal == "on" ? true : false
+    	}
+        if(onSwitches) {
+        	syncVolume()
+        } else {
+        	log.debug "No Volume Sync Switches on - not syncing"
+        }
+    } else {
+    	log.debug "Syncing"
+    	syncVolume()
+    }
+	
 }
 
 def setLabel() {
@@ -66,8 +105,7 @@ def setLabel() {
     }
 }
 
-def syncVolume(evt) {
-    log.debug "app event (syncVolume) ${evt.name}:${evt.value} received"
+def syncVolume() {
     double masterVolume = Double.parseDouble(theAudioGroup.currentState('level').value)
     log.debug "masterVolume: " + masterVolume
     
