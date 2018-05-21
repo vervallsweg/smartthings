@@ -10,6 +10,7 @@
 - Group playback now detected by API automatically
 - New selectable options in device settings
 - Device icon no longer changeable by user
+- User can now change TTS voice to Google, thanks to [@CultusMechanicus](https://github.com/vervallsweg/cast-web-api/pull/64 "@CultusMechanicus")
 
 ## Version 0.2
 - DTH is now aware of which preset is currently playing

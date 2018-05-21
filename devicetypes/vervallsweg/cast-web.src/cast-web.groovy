@@ -1,5 +1,5 @@
 /**
- *  cast-web-1
+ *  cast-web
  *
  *  Copyright 2017 Tobias Haerke
  *
@@ -28,10 +28,13 @@ preferences {
         required: false, multiple:false, value: "nothing", options: ["1","2","3","4","5","6"])
     input("configLoglevel", "enum", title: "Log level?",
         required: false, multiple:false, value: "nothing", options: ["0","1","2","3","4"])
+    input("googleTTS", "bool", title: "Use Google's TTS voice?", required: false)
+    input("googleTTSLanguage", "enum", title: "Google TTS language?",
+        required: false, multiple:false, value: "nothing", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"])
 }
  
 metadata {
-    definition (name: "cast-web-1", namespace: "vervallsweg", author: "Tobias Haerke") {
+    definition (name: "cast-web", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
         capability "Audio Notification"
         capability "Music Player"
@@ -235,6 +238,11 @@ def setLevel(level) {
     try { lvl = (double) level; } catch (e) {
         lvl = Double.parseDouble(level)
     }
+    if( lvl == device.currentValue("level") ){
+        logger('debug', "Setting group level: " + level)
+        apiCall('/volume/'+lvl+'/group', true)
+        return
+    }
     apiCall('/volume/'+lvl, true)
 }
 
@@ -402,6 +410,11 @@ def off() {
 }
 
 def speak(phrase, resume = false) {
+    if(settings.googleTTS && settings.googleTTSLanguage){
+        if(settings.googleTTS==true) {
+            return playTrack( textToSpeech(phrase, true).uri, 0, 0, true, settings.googleTTSLanguage )
+        }
+    }
     return playTrack( textToSpeech(phrase, true).uri, 0, 0, true )
 }
 //AUDIO NOTIFICATION, TEXT
@@ -430,17 +443,24 @@ def playTrackAtVolume(trackToPlay, level = 0) {
     return playTrack(url, level)
 }
 //AUDIO NOTIFICATION, TRACK
-def playTrack(uri, level = 0, thirdValue = 0, resume = false) {
+def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level + " resume: " + resume)
 
     if (level!=0&&level!=null) { setLevel(level) }
     
     def data = '{ "mediaType":"audio/mp3", "mediaUrl":"'+uri+'", "mediaStreamType":"BUFFERED", "mediaTitle":"SmartThings", "mediaSubtitle":"SmartThings playback", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300"}'
+    if(googleTTS) {
+        data = '{ "mediaType":"audio/mp3", "mediaUrl":"", "mediaStreamType":"BUFFERED", "mediaTitle":"'+uri+'", "mediaSubtitle":"SmartThings notification", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300", "googleTTS":"'+googleTTS+'"}'
+    }
     if(resume) {
-        def number = 1
+        def number = 0
+        JSONObject preset = null
         if(settings.configResume) { number = settings.configResume }
-        if(getTrackData('preset')[0]) { number = getTrackData('preset')[0] }
-        JSONObject preset = getPresetObject(number)
+        if(getTrackData(['preset'])[0]) { number = getTrackData(['preset'])[0] }
+        log.warn 'number: '+number
+        if(number > 0) {
+            preset = getPresetObject(number)
+        }
     
         if (preset) {
             data = data + ', '+preset.toString()
@@ -522,7 +542,7 @@ def setTrackData(newTrackData) {
             }
             if(currentTrackData.has('preset')) {
                 logger( 'debug', "setTrackData() sendEvent presetName playing for: "+ currentTrackData.get('preset') )
-                sendEvent(name: "preset"+currentTrackData.get('preset')+"Name", value: "Playing", displayed: true, changed: true)
+                sendEvent(name: "preset"+currentTrackData.get('preset')+"Name", value: "Playing", displayed: false, changed: true)
                 parsePresets( currentTrackData.get('preset') )
             }
         }
