@@ -14,7 +14,7 @@
  *
  */
 definition(
-    name: "Cast web - service manager 1",
+    name: "Cast web - service manager",
     namespace: "vervallsweg",
     author: "Tobias Haerke",
     description: "Connect your Cast devices through the Cast web API to SmartThings.",
