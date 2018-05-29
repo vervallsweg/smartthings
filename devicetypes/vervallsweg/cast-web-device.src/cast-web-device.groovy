@@ -1,5 +1,5 @@
 /**
- *  cast-web
+ *  cast-web-device
  *
  *  Copyright 2017 Tobias Haerke
  *
@@ -34,7 +34,7 @@ preferences {
 }
  
 metadata {
-    definition (name: "cast-web", namespace: "vervallsweg", author: "Tobias Haerke") {
+    definition (name: "cast-web-device", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
         capability "Audio Notification"
         capability "Music Player"
@@ -412,7 +412,7 @@ def off() {
 def speak(phrase, resume = false) {
     if(settings.googleTTS && settings.googleTTSLanguage){
         if(settings.googleTTS==true) {
-            return playTrack( textToSpeech(phrase, true).uri, 0, 0, true, settings.googleTTSLanguage )
+            return playTrack( phrase, 0, 0, true, settings.googleTTSLanguage )
         }
     }
     return playTrack( textToSpeech(phrase, true).uri, 0, 0, true )

@@ -1,5 +1,6 @@
 # Changelog
 ##Version 1.0.0
+- Renamed to cast-web-device
 - Compatible with API version 1.0.0
 - Cast device changes immediately displayed in ST
 - No more polling
