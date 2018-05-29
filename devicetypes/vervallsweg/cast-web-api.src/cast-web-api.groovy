@@ -140,7 +140,7 @@ def createDevices(ids) {
     ids.each {
         if(it!=null&&it!="") {
             logger('debug', "createDevices() adding id: " + it)
-            addChildDevice("vervallsweg", "cast-web", it, location.hubs[0].id, [
+            addChildDevice("vervallsweg", "cast-web-device", it, location.hubs[0].id, [
                 label: "cast-web-device",
                 data: [
                     "apiHost": getDataValue("apiHost")
