@@ -37,6 +37,7 @@ preferences {
 }
 
 def mainPage() {
+    if(state.latestHttpResponse){state.latestHttpResponse = null;}
     dynamicPage(name: "mainPage", title: "Manage your Cast devices", nextPage: null, uninstall: true, install: true) {
         section("Configure web API"){
             input "apiHostAddress", "string", title: "API host address", required: true
