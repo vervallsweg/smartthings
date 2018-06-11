@@ -3,6 +3,7 @@
 - Compatible with API version 1.0.0
 - Removed polling options
 - Removed health check
+- Check API connection now resets on mainPage()
 
 ## Version 0.2
 - Device (friendly) name now shown on discovery
