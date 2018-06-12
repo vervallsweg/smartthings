@@ -31,33 +31,30 @@ preferences {
     page(name: "checkApiConnectionPage")
     page(name: "discoveryPage")
     page(name: "addDevicesPage")
-    page(name: "healthCheckPage")
-    page(name: "manualHealthCheck")
     page(name: "configureDevicePage")
     page(name: "saveDeviceConfigurationPage")
-    page(name: "updateApiHostPage")
     page(name: "updateServiceManagerPage")
 }
 
 def mainPage() {
-    restartHealthCheck()
+    if(state.latestHttpResponse){state.latestHttpResponse = null;}
     dynamicPage(name: "mainPage", title: "Manage your Cast devices", nextPage: null, uninstall: true, install: true) {
         section("Configure web API"){
             input "apiHostAddress", "string", title: "API host address", required: true
-            href "updateServiceManagerPage", title: "Check for API updates", description:""
+            href "updateServiceManagerPage", title: "Check for updates", description:""
             href "checkApiConnectionPage", title: "Test API connection", description:""
-            href "updateApiHostPage", title: "Update API host address", description:""
         }
         section("Configure Cast devices"){
             input(name: "settingsLogLevel", type: "enum", title: "Service manager log level", options: [0, 1, 2, 3, 4])
             href "discoveryPage", title:"Discover Devices", description:""//, params: [pbutton: i]
-            href "healthCheckPage", title: "Health check", description:""
-            href(name: "presetGenerator",title: "Preset generator",required: false,style: "external",url: "https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html",description: "")
         }
         section("Installed Devices"){
             def dMap = [:]
             getChildDevices().sort({ a, b -> a["label"] <=> b["label"] }).each {
-                href "configureDevicePage", title:"$it.label", description:"", params: [dni: it.deviceNetworkId]
+                it.getChildDevices().sort({ a, b -> a["label"] <=> b["label"] }).each {
+                    logger('debug', "mainPage(), it.label: "+it.label+", it.deviceNetworkId: "+it.deviceNetworkId)
+                    href "configureDevicePage", title:"$it.label", description:"", params: [dni: it.deviceNetworkId]
+                }
             }
         }
     }
@@ -86,24 +83,23 @@ def discoveryPage() {
         logger('debug', "discoveryPage(), refresh")
         
         section("Please wait while we discover your Cast devices. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered.") {
-            if(state.latestDeviceMap!=null && state.latestDeviceMap.size()>0) {
-                input "selectedDevices", "enum", required:false, title:"Select Cast Device ("+ state.latestDeviceMap.size() +" found)", multiple:true, options: state.selectionMap
-                state.selectedDevicesMap = state.latestDeviceMap
+            if(state.devicesMap!=null && state.devicesMap.size()>0) {
+                input "selectedDevices", "enum", required:false, title:"Select Cast Device ("+ state.devicesMap.size() +" found)", multiple:true, options: state.devicesMap
+                //state.selectedDevicesMap = state.devicesMap
             } else {
                 input "selectedDevices", "enum", required:false, title:"Select Cast Device (0 found)", multiple:true, options: [:]
-                state.selectedDevicesMap = null
+                //state.selectedDevicesMap = null
             }
         }
         
-        state.latestDeviceMap = null
+        //state.latestDeviceMap = null
     }
 }
 
 def addDevicesPage() {
     def addedDevices = addDevices(selectedDevices)
-    def nextPage = "mainPage"
     
-    dynamicPage(name:"addDevicesPage", title:"Done", nextPage: nextPage) {
+    dynamicPage(name:"addDevicesPage", title:"Done", nextPage: null, uninstall: false, install: true) {
         section("Devices added") {
             if( !addedDevices.equals("0") ) {
                 addedDevices.each{ key, value ->
@@ -118,25 +114,34 @@ def addDevicesPage() {
 
 def addDevices(selectedDevices) {
     def addedDevices = [:]
-    logger('debug', "selectedDevices: "+selectedDevices)
-    
+    logger('debug', "selectedDevices: "+selectedDevices+" childDevices: " + getChildDevices().size() )
+        
     if(selectedDevices && selectedDevices!=null) {
-        for(int i=0; i<selectedDevices.size(); i++) {
-            logger('debug', "Selected device "+i+ ", DNI: " + state.selectedDevicesMap[selectedDevices[i]] )
-            if(getChildDevices()?.find { it.deviceNetworkId == state.selectedDevicesMap[selectedDevices[i]] }) {
-                logger("error", "Device exists!")
-            } else {
-                logger('debug', "Does not exist, creating device: " + state.selectedDevicesMap[selectedDevices[i]])
-
-                addChildDevice("vervallsweg", "cast-web", state.selectedDevicesMap[selectedDevices[i]], location.hubs[0].id, [
-                    "label": state.latestDevicesNameMap[selectedDevices[i]],
+        
+        if(getChildDevices().size()<1) {
+            logger('debug', "No cast-web-api installed" )
+            
+            if(state.latestHttpMac) {
+                addChildDevice("vervallsweg", "cast-web-api", ""+state.latestHttpMac, location.hubs[0].id, [
+                    "label": "cast-web-api",
                     "data": [
                         "apiHost": apiHostAddress,
-                        "deviceAddress": selectedDevices[i]
+                        "devices": "[]"
                     ]
                 ])
-                addedDevices.put(selectedDevices[i], state.latestDevicesNameMap[selectedDevices[i]])
+            } else {
+                addedDevices.put('Error', "The cast-web-api doesn't retun it's MAC address. No devices were added.")
             }
+        }
+        
+        selectedDevices.each { key ->
+            logger('debug', "Selected device id: " + key + ", name: " + state.devicesMap[key] )
+            addedDevices.put(key, state.devicesMap[key])
+        }
+        
+        getChildDevices().each {
+            it.updateDataValue("devices", ""+selectedDevices);
+            it.updated()
         }
     }
     
@@ -147,203 +152,81 @@ def addDevices(selectedDevices) {
     }
 }
 
-def updateDeviceAddresses() {
-    logger('debug', "updateDeviceAddresses() executed")
-    
-    //TODO: cleanMapOfDuplicates(map)
-    
-    def deviceMap = state.latestDeviceMap
-    def updatedDeviceMap = [:]
-    
-    deviceMap.each { key, value ->
-        logger('debug', "Selected device address: " + key + ", DNI: " + value)
-        def d = getChildDevices()?.find { it.deviceNetworkId == value }
-        //REALY bad temporary fix to deal with changing group ids
-        if(!d) {
-            d = getChildDevices()?.find { it.deviceNetworkId == flipCastId(value) }
-            if(d) {
-                logger("warn", "DNI: " + d.deviceNetworkId + " moved to: " + value)
-                d.setDeviceNetworkId(value)
+def configureDevicePage(dni) {
+    def d
+    getChildDevices().each{ api ->
+        api.getChildDevices().each { device ->
+            if( device.deviceNetworkId.equals(dni["dni"]) ) {
+                d = device
             }
         }
-        
-        if(d) {
-            logger("warn", "Device (" + d + ":" + d.deviceNetworkId + ") exists, old address: " + d.getDataValue("deviceAddress") + " new address: " + key)
-            updatedDeviceMap.put(d.deviceNetworkId, "from: " + d.getDataValue("deviceAddress") + " to: " + key)
-            d.updateDataValue("deviceAddress", key)
-        }
     }
-    
-    logger('debug', "updateDeviceAddresses() finished, updatedDeviceMap: " + updatedDeviceMap)
-    state.latestUpdatedDevicesMap = updatedDeviceMap
-    state.latestUpdatedDevicesTime = getTimeStamp()
-}
-
-def flipCastId(castId) {
-    logger('debug', "flipCastId() executed, castId: " + castId + ", flipCastId, last two characters: " + castId[-2..-1])
-    
-    if( castId[-2..-1].equals("-1") ) {
-        logger('debug', "flipCastId flipped: " + castId[0..-3])
-        return castId[0..-3]
-    } else {
-        logger('debug', "flipCastId flipped: " + castId+"-1")
-        return castId+"-1"
-    }
-}
-
-def configureDevicePage(dni) {
-    def d = getChildDevices()?.find { it.deviceNetworkId == dni["dni"] }
     logger('debug', "configureDevicePage() selected device d: " + d)
     state.configCurrentDevice = d.deviceNetworkId
     
-    if(!d.getDataValue("logLevel")) {
-        logger("warn", "logLevel not set, setting to 0")
-        d.updateDataValue("logLevel", "0")
-    }
+    if(d){
+        resetFormVar(d)
     
-    resetFormVar(d)
-    
-    dynamicPage(name: "configureDevicePage", title: "Configure "+d.deviceNetworkId, nextPage: "saveDeviceConfigurationPage") {
-        section("Device settings") {
-            input(name: "label", type: "text", title: "Device name", defaultValue: d.label, required: true)
-            input(name: "device_type", type: "enum", title: "Device type", defaultValue: [d.getDataValue("deviceType")], options: ["audio","video"], required: true)
+        dynamicPage(name: "configureDevicePage", title: "Configure "+d.displayName+" ("+d.deviceNetworkId+")", nextPage: "saveDeviceConfigurationPage") {
+            section("Connection settings") {
+                input(name: "api_host_address", type: "text", title: "cast-web-api address", defaultValue: [d.getDataValue("apiHost")], required: true)
+            }
+            section("Presets") {
+                input(name: "presetObject", type: "text", title: "Preset object", defaultValue: [d.getDataValue("presetObject")], required: true)
+                href(name: "presetGenerator",title: "Edit this preset in your browser",required: false,style: "external",url: "https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html?"+d.getDataValue("presetObject"),description: "")
+            }
         }
-        section("Refresh settings") {
-            input(name: "poll_minutes", type: "enum", title: "Refresh every x minute", defaultValue: [d.getDataValue("pollMinutes")], options: ["1","2","5","10","20","30"], required: true)
-            input(name: "poll_seconds", type: "number", title: "Refresh on every x second", defaultValue: [d.getDataValue("pollSecond")], required: true, range: "0..59")
-        }
-        section("Connection settings") {
-            input(name: "device_address", type: "text", title: "Cast device address", defaultValue: [d.getDataValue("deviceAddress")], required: true)
-            input(name: "api_host_address", type: "text", title: "Web API host address", defaultValue: [d.getDataValue("apiHost")], required: true)
-        }
-        section("Presets") {
-            input(name: "presetObject", type: "text", title: "Preset object", defaultValue: [d.getDataValue("presetObject")], required: true)
-            href(name: "presetGenerator",title: "Edit this preset in your browser",required: false,style: "external",url: "https://vervallsweg.github.io/smartthings/cast-web-preset-generator/preset-generator.html?"+d.getDataValue("presetObject"),description: "")
-        }
-        
-        section("Logging") {
-            input(name: "log_level", type: "enum", title: "Logging level", defaultValue: [d.getDataValue("logLevel")], options: ["0","1","2","3","4"], required: true)
+    } else {
+        dynamicPage(name: "configureDevicePage", title: "Error", nextPage: "mainPage") {
+            section("Something went wrong"){ 
+                paragraph "Cannot access the device"
+            }
         }
     }
 }
 
 def saveDeviceConfigurationPage() {
-    def d = getChildDevices()?.find { it.deviceNetworkId == state.configCurrentDevice }
+    def d
+    getChildDevices().each{ api ->
+        api.getChildDevices().each { device ->
+            if( device.deviceNetworkId.equals( state.configCurrentDevice ) ) {
+                d = device
+            }
+        }
+    }
     logger('debug', "saveDeviceConfigurationPage() writing configuration for d: " + d)
     
-    d.displayName = label
-    d.updateDataValue("deviceType", device_type)
-    d.updateDataValue("pollMinutes", ""+poll_minutes)
-    d.updateDataValue("pollSecond", ""+poll_seconds)
-    d.updateDataValue("deviceAddress", device_address)
+    //d.displayName = label
+    //d.updateDataValue("deviceType", device_type)
+    //d.updateDataValue("pollMinutes", ""+poll_minutes)
+    //d.updateDataValue("pollSecond", ""+poll_seconds)
+    //d.updateDataValue("deviceAddress", device_address)
     d.updateDataValue("apiHost", api_host_address)
     d.updateDataValue("presetObject", presetObject)
-    d.updateDataValue("logLevel", ""+log_level)
+    //d.updateDataValue("logLevel", ""+log_level)
     d.updated()
     
     dynamicPage(name: "saveDeviceConfigurationPage", title: "Configuration updated for: "+d.deviceNetworkId, nextPage: "mainPage") {
         section("Device name"){ paragraph ""+d.displayName }
-        section("Device type"){ paragraph ""+d.getDataValue("deviceType") }
-        section("Refresh every x minute"){ paragraph ""+d.getDataValue("pollMinutes") }
-        section("Refresh on every x second"){ paragraph ""+d.getDataValue("pollSecond") }
-        section("Cast device IP address"){ paragraph ""+d.getDataValue("deviceAddress") }
+        //section("Device type"){ paragraph ""+d.getDataValue("deviceType") }
+        //section("Refresh every x minute"){ paragraph ""+d.getDataValue("pollMinutes") }
+        //section("Refresh on every x second"){ paragraph ""+d.getDataValue("pollSecond") }
+        //section("Cast device IP address"){ paragraph ""+d.getDataValue("deviceAddress") }
         section("Web API host address"){ paragraph ""+d.getDataValue("apiHost") }
         section("Presets"){ paragraph ""+d.getDataValue("presetObject") }
-        section("Log level"){ paragraph ""+d.getDataValue("logLevel") }
+        //section("Log level"){ paragraph ""+d.getDataValue("logLevel") }
     }
 }
 
 def resetFormVar(device) {
-    if(label){ app.updateSetting("label", device.label) }
-    if(device_type){ app.updateSetting("device_type", [device.getDataValue("deviceType")]) }
-    if(poll_minutes){ app.updateSetting("poll_minutes", [device.getDataValue("pollMinutes")]) }
-    if(poll_seconds){ app.updateSetting("poll_seconds", [device.getDataValue("pollSecond")]) }
-    if(device_address){ app.updateSetting("device_address", [device.getDataValue("deviceAddress")]) }
+    //if(label){ app.updateSetting("label", device.label) }
+    //if(device_type){ app.updateSetting("device_type", [device.getDataValue("deviceType")]) }
+    //if(poll_minutes){ app.updateSetting("poll_minutes", [device.getDataValue("pollMinutes")]) }
+    //if(poll_seconds){ app.updateSetting("poll_seconds", [device.getDataValue("pollSecond")]) }
+    //if(device_address){ app.updateSetting("device_address", [device.getDataValue("deviceAddress")]) }
     if(api_host_address){ app.updateSetting("api_host_address", [device.getDataValue("apiHost")]) }
     if(presetObject){ app.updateSetting("presetObject", [device.getDataValue("presetObject")]) }
-    if(log_level){ app.updateSetting("log_level", [device.getDataValue("logLevel")]) }
-}
-
-def healthCheck() {
-    logger('debug', "healthCheck() called")
-    
-    getDevices()
-    runIn(10, updateDeviceAddresses)
-}
-
-def healthCheckPage() {
-    def latestUpdatedDevicesMap = state.latestUpdatedDevicesMap
-    def latestDevicesNameMap = state.latestDevicesNameMap
-    def lastRunAt = state.latestUpdatedDevicesTime
-    def title
-    
-    logger('debug', "healthCheckPage() state.latestUpdatedDevicesTime: "+state.latestUpdatedDevicesTime+", latestDevicesNameMap: " + latestDevicesNameMap)
-    
-    if(lastRunAt+1200>getTimeStamp()) {title="Health check in progress"} else {title="Health check not running"}
-    
-    dynamicPage(name: "healthCheckPage", title: title, nextPage: "mainPage") {
-        section("Latest health check at") {
-            paragraph "" + getTimeStringFromEpoch(lastRunAt)
-            href "manualHealthCheck", title: "Run now", description:""
-        }
-        section("Result of the latest health check (every 15 minutes)") {
-            if(latestUpdatedDevicesMap==null|| latestUpdatedDevicesMap==[:]) {
-                paragraph "Nothing changed"
-            } else {
-                latestUpdatedDevicesMap.each{ key, value ->
-                    paragraph title: getChildDevices()?.find { it.deviceNetworkId == key }.label, "ID: "+key+", "+value
-                }
-            }
-        }
-    }
-}
-
-def manualHealthCheck() {
-    dynamicPage(name: "manualHealthCheck", title: "Restart health check", nextPage: null, install: true) {
-        healthCheck()
-        section("Click save for health check") {
-            paragraph "Service manager will close and conduct a manual health check."
-        }
-    }
-}
-
-def restartHealthCheck() {
-    logger('debug', "restartHealthCheck(), unschedule")
-    unschedule()
-    
-    logger('debug', "restartHealthCheck(), runEvery15Minutes(healthCheck)")
-    runEvery15Minutes(healthCheck)
-}
-
-def updateApiHostPage() {
-    logger('debug', "Executing 'updateApiHostPage()'")
-    
-    dynamicPage(name: "updateApiHostPage", title: "Updated API host address on all devices", nextPage: "mainPage") {
-        section("Result") {
-            if(updateApiHost()) {
-                paragraph "Success!"
-            } else {
-                paragraph "Error while updating API address"
-            }
-            
-        }
-    }
-}
-
-def updateApiHost() {
-    logger("warn", "Executing 'updateApiHost()'")
-    
-    try {
-        getChildDevices().each {
-            logger('debug', "Updating apiHost to: "+ apiHostAddress + ", on: " + it.deviceNetworkId)
-            it.updateDataValue("apiHost", ""+apiHostAddress)
-        }
-        return true
-    } catch (Exception e) {
-        logger("error", "Exception caught: " + e)
-        return false
-    }
-    
+    //if(log_level){ app.updateSetting("log_level", [device.getDataValue("logLevel")]) }
 }
 
 def installed() {
@@ -361,24 +244,11 @@ def updated() {
 
 def initialize() {
     // TODO: subscribe to attributes, devices, locations, etc.
-    state.latestUpdatedDevicesTime = getTimeStamp()
-}
-
-def getTimeStamp() {
-    Date now = new Date(); 
-    def timeStamp = (long)(now.getTime()/1000)
-    logger("debug", "getTimeStamp(), timestamp generated: "+timeStamp)
-    return timeStamp;
-}
-
-def getTimeStringFromEpoch(epoch) {
-    long ep = (long) epoch;
-    return new Date(ep*1000).toString()
 }
 
 def getDevices() {
     logger('debug', "Executing 'getDevices'")
-    sendHttpRequest(apiHostAddress, '/getDevices')
+    sendHttpRequest(apiHostAddress, '/device')
 }
 
 def sendHttpRequest(String host, String path) {
@@ -393,47 +263,39 @@ void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
 def parse(description) {
     logger('debug', "Parsing '${description}'")
     
-    def msg, json, status
+    def msg, json, status, mac
     try {
         msg = parseLanMessage(description)
         status = msg.status
         json = msg.json
+        mac = msg.mac
     } catch (e) {
         logger("error", "Exception caught while parsing data: "+e)
         return null;
     }
   
     state.latestHttpResponse = status
+    state.latestHttpMac = mac
     if(status==200){
         def length = 0
         logger('debug', "JSON rcvd: "+json+", JSON.size: "+json.size)
         
-        def devicesMap = [:]
-        def devicesNameMap = [:]
-        def selectionMap = [:]
+        def devices = [:]
         for(int i=0; i<json.size; i++) {
-            logger('debug', "index "+ i +": "+json[i]['deviceName']+", "+ json[i]['deviceAddress'])
-            devicesMap.put(json[i]['deviceAddress']+":"+json[i]['devicePort'], json[i]['deviceName'])
-            devicesNameMap.put(json[i]['deviceAddress']+":"+json[i]['devicePort'], json[i]['deviceFriendlyName'])
-            selectionMap.put(json[i]['deviceAddress']+":"+json[i]['devicePort'], json[i]['deviceFriendlyName']+" ("+json[i]['deviceName']+")")
+            logger('debug', "index "+ i +": "+json[i]['name']+", "+ json[i]['id'])
+            devices.put(json[i]['id'], json[i]['name'])
         }
        
-        logger('debug', "devicesMap: " + devicesMap)
-        logger('debug', "devicesNameMap: " + devicesNameMap)
-        logger('debug', "selectionMap: " + selectionMap)
-        state.latestDeviceMap = devicesMap
-        state.latestDevicesNameMap = devicesNameMap
-        state.selectionMap = selectionMap
+        logger('debug', "devices: " + devices)
+        state.devicesMap = devices
     } else {
-        state.latestDeviceMap = [:]
-        state.latestDevicesNameMap = [:]
-        state.selectionMap = [:]
+        state.devicesMap = [:]
     }
 }
 
 //UPDATE
 def getThisVersion() {
-    return 0.2
+    return '1.0.0'
 }
 
 def getLatestVersion() {
