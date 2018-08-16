@@ -22,9 +22,12 @@
 metadata {
     definition (name: "cast-web-api", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
+        capability "Audio Notification"
         capability "Bridge"
         capability "Refresh"
+        capability "Speech Synthesis"
         
+        command "checkAssistant"
         command "checkVersion"
         command "setApiHost", ["string"]
     }
@@ -43,8 +46,11 @@ metadata {
         valueTile("updateStatus", "device.updateStatus", width: 4, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkVersion"
         }
+        valueTile("assistantStatus", "device.assistantStatus", width: 4, height: 2) {
+            state "val", label:'${currentValue}', defaultState: true, action: "checkAssistant"
+        }
         //main "mainTile"
-        details(["mainTile", "refresh", "updateStatus"])
+        details(["mainTile", "refresh", "updateStatus", "assistantStatus"])
     }
 }
 
@@ -83,14 +89,26 @@ def parse(String description) {
             }
         } else {
             def vthis, vlatest
+            def assistant = null
+            def ready = null
+            
             if (message.json.this) {
                 vthis = message.json.this
             }
             if (message.json.latest) {
                 vlatest = message.json.latest
             }
+            if (message.json.assistant) {
+                assistant = message.json.assistant
+            }
+            if (message.json.ready) {
+                ready = message.json.ready
+            }
             if (vthis && vlatest) {
                 sendEvent(name: "updateStatus", value: ("Current: "+ vthis + "\nLatest: " + vlatest), displayed: false)
+            }
+            if (assistant!=null && ready!=null) {
+                sendEvent(name: "assistantStatus", value: ("Assistant: "+ assistant + "\nready: " + ready + "\nIf you never used Google Assistant with cast-web go to service manager > Setup Google Assistant"), displayed: false)
             }
         }
     }
@@ -164,6 +182,32 @@ def parseListFromString(string) {
 def checkVersion() {
     def host = getDataValue("apiHost")
     sendHubCommand(new physicalgraph.device.HubAction("""GET /config/version HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+}
+
+def checkAssistant() {
+    def host = getDataValue("apiHost")
+    sendHubCommand(new physicalgraph.device.HubAction("""GET /assistant HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+}
+
+def speak(phrase) {
+    logger('info', "speak(), phrase: " + phrase)
+    def host = getDataValue("apiHost")
+    sendHubCommand(new physicalgraph.device.HubAction("""GET /assistant/broadcast/$phrase HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+}
+
+def playText(message, level = 0, resume = false) {
+    logger('info', "playText, message: " + message + " level: " + level)
+    return speak(message, true)
+}
+
+def playTextAndResume(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndResume, message: " + message + " level: " + level)
+    return speak(message, true)
+}
+
+def playTextAndRestore(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndRestore, message: " + message + " level: " + level)
+    return speak(message, true)
 }
 
 def setApiHost(apiHost) {
