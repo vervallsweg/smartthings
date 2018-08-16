@@ -16,6 +16,7 @@
  preferences {
     input("configLoglevel", "enum", title: "Log level?",
         required: false, multiple:false, value: "nothing", options: ["0","1","2","3","4"])
+    input("syncNamesFromAPI", "bool", title: "Don't sync cast-device names from API?", required: false)
 }
  
 metadata {
@@ -25,6 +26,7 @@ metadata {
         capability "Refresh"
         
         command "checkVersion"
+        command "setApiHost", ["string"]
     }
 
     simulator {
@@ -61,7 +63,9 @@ def parse(String description) {
                     foundTarget = true;
                     logger('debug', "Parsing found target name: "+child.displayName+", dni: "+child.deviceNetworkId)
                     if(message.json.name) {
-                        child.displayName = message.json.name
+                        if(settings.syncNamesFromAPI != true) {
+                            child.displayName = message.json.name
+                        }
                     }
                     //if(message.json.connection) { //WTF: cannot be set by dev?!
                     //    if( message.json.connection.equals("connected") ) {
@@ -162,6 +166,16 @@ def checkVersion() {
     sendHubCommand(new physicalgraph.device.HubAction("""GET /config/version HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
 }
 
+def setApiHost(apiHost) {
+    log.warn "apiHost: "+apiHost
+    logger('info', 'setApiHost(), to: '+apiHost)
+    updateDataValue("apiHost", apiHost)
+    
+    def children = getChildDevices()
+    children.each { child ->
+        child.updateDataValue("apiHost", apiHost)
+    }
+}
 
 //DEBUGGING
 def logger(level, message) {
