@@ -8,6 +8,7 @@
   <title>Preset generator</title>
 
   <link rel="stylesheet" type="text/css" href="semantic-ui/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="semantic-ui/semantic-responsive-helpers.css">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="semantic-ui/semantic.min.js"></script>
 </head>
@@ -32,6 +33,14 @@
 	  </div>
   </div>
   <div class="ui text container" style="margin: 1em 0">
+  	  <div class="ui warning message">
+		  <i class="close icon"></i>
+		  <div class="header">
+		    Please check your cast-web-api version!
+		  </div>
+		  This preset generator is only for use with cast-web-api v1.1 or higher! If you just upgraded, your presets will be converted to the new format. If you are using an older version of cast-web please use the <a href="https://vervallsweg.github.io/smartthings/v0/cast-web-preset-generator/preset-generator.html" id="preset-redir">old preset generator</a>.
+		  <script type="text/javascript">$('#preset-redir').attr('href', $('#preset-redir').attr('href')+location.search)</script>
+	  </div>
       <h1 class="ui dividing header">Preset generator</h1>
 
       <div class="ui ordered three steps">
@@ -76,7 +85,7 @@
 	  </div>
 	  <div id="container_step_2" style="display: none">
         <h2>2. Edit your presets</h2>
-     	<div class="ui styled fluid accordion" style="margin: 0 0 1em" id="presetAccordion">
+     	<div class="ui top attached tabular menu" id="presetTabs">
      		
 		</div>
 
@@ -118,11 +127,22 @@
 </body>
 </html>
 <script type="text/javascript">
+	$('.message .close')
+	.on('click', function() {
+		$(this)
+		.closest('.message')
+		.transition('fade')
+		;
+	})
+	;
 	$('.ui.accordion')
 	 	.accordion()
 	;
 	$('#copyToClipboard')
 	  .popup()
+	;
+	$('.menu .item')
+	  .tab()
 	;
 
 	var importObject, editObject, outputObject;
@@ -147,6 +167,7 @@
 			console.log('Step 2: valid.')
 			setCurrentStep(2);
 			setEditObject();
+			createPresetTabs();
 			fillPresetAccordion(parsePresetObject(importObject));
 		} else {
 			console.log('Step 2: not valid.');
@@ -210,33 +231,44 @@
 
 		try {
 			for (var i = 1; i <= 6; i++) {
-				var currentForm = document.getElementById('preset'+i);
-				var mediaType = "";
-				var mediaStreamType = "";
-				try {
-					mediaType = currentForm.getElementsByClassName('mediaType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
-				} catch (e) {
-					console.log('mediaType not set');
+				var currentPreset = document.getElementById('preset-'+i);
+				var mediaElements = [];
+
+				$(currentPreset).find('.mediaElement').each(function() {
+					var mediaElement = {
+						mediaTitle: $(this).find('.mediaTitle').val(),
+						mediaSubtitle: $(this).find('.mediaSubtitle').val(),
+						mediaType: $(this).find('.mediaType').parent().find('.text').text(),
+						mediaUrl: $(this).find('.mediaUrl').val(),
+						mediaStreamType: $(this).find('.mediaStreamType').parent().find('.text').text(),
+						mediaImageUrl: $(this).find('.mediaImageUrl').val()
+					};
+					mediaElements.push( replaceUndefined( mediaElement ) );
+				});
+				if (mediaElements.length == 0) {
+					var mediaElement = getDefaultMediaElement();
+					mediaElement.mediaTitle = 'Preset '+i;
+					mediaElements.push(mediaElement);
 				}
-				try {
-					mediaStreamType = currentForm.getElementsByClassName('mediaStreamType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
-				} catch (e) {
-					console.log('mediaType not set');
-				}
-				console.log('mediaTitle: '+ mediaType);
-				presetObject['preset'+i] = {
-					mediaTitle: currentForm.getElementsByClassName('mediaTitle')[0].value,
-					mediaSubtitle: currentForm.getElementsByClassName('mediaSubtitle')[0].value,
-					mediaType: mediaType,
-					mediaUrl: currentForm.getElementsByClassName('mediaUrl')[0].value,
-					mediaStreamType: mediaStreamType,
-					mediaImageUrl: currentForm.getElementsByClassName('mediaImageUrl')[0].value
-				};
+				presetObject['preset'+i] = mediaElements;
+				console.log(mediaElements);
 			}
 		} catch (e) {
 			console.log('Cannot getEditObjectFormJSON.');
 		}
 		return JSON.stringify(presetObject);
+	}
+
+	function replaceUndefined(input) {
+		var mediaElement = input;
+		for (var key in mediaElement) {
+			if (mediaElement.hasOwnProperty(key)) {
+				if (!mediaElement[key]) {
+					mediaElement[key] = '';
+				}
+			}
+		}
+		return mediaElement;
 	}
 	
 	function setOutputObject(presetObject) {
@@ -283,10 +315,19 @@
 		try {
 			var parsed = JSON.parse(presetObject);
 			for (var i = 1; i <= 6; i++) {
-				if(!validatePreset(parsed['preset'+1])){
-					console.log(i+"pre false");
-					return false;
+				var current = parsed['preset'+1];
+
+				if (!Array.isArray(current)) {
+					current = [ current ];
 				}
+
+				current.forEach(function(mediaElement) {
+					if(!validateMediaElement(mediaElement)){
+						console.log(i+"pre false");
+						return false;
+					}
+				});
+				
 			}
 		} catch (e){
 			console.log("Exception: "+e);
@@ -297,7 +338,7 @@
 		return false;
 	}
 
-	function validatePreset(preset) {
+	function validateMediaElement(preset) {
 		if (preset['mediaTitle']!=null&&preset['mediaSubtitle']!=null&&preset['mediaType']!=null&&preset['mediaUrl']!=null&&preset['mediaStreamType']!=null&&preset['mediaImageUrl']!=null) {
 			return true;
 		}
@@ -306,7 +347,18 @@
 
 	// PRESETS
 	function getDefaultPresetObject() {
-		return '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}';
+		return '{"preset1":[{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset2":[{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset3":[{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset4":[{"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset5":[{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset6":[{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}]}';
+	}
+
+	function getDefaultMediaElement() {
+		return {
+			mediaTitle:"Media element",
+			mediaSubtitle:"",
+			mediaType:"",
+			mediaUrl:"",
+			mediaStreamType:"",
+			mediaImageUrl:""
+		};
 	}
 
 	function parsePresetObject(presetObject) {
@@ -321,32 +373,79 @@
 		;
 	}
 
+	// Preset tabs
+	function createPresetTabs(number) {
+		var presetTabs = $('#presetTabs');
+
+		for (var i = 1; i <= 6; i++) {
+			if (document.getElementsByClassName("preset-"+i).length>0) {
+				console.log("preset-"+i+" exists!");
+				$('.preset-'+i).remove();
+			}
+			var presetTab = getPresetTab(i);
+
+			presetTabs.append( presetTab.a );
+			presetTabs.after( presetTab.segment );
+		}
+
+		$('.preset-1').addClass('active');
+		$('.menu .item')
+			.tab()
+		;
+		$('.ui.accordion')
+		 	.accordion()
+		;
+	}
+
+	function getPresetTab(number) {
+		console.log('getPresetTab number: ' + number);
+		var tab = {};
+
+		tab.a = '<a class="item preset-'+number+'" data-tab="preset-'+number+'"><span class="mobile hidden">Preset &nbsp;</span>'+number+'</a>';
+		tab.segment = '<div class="ui bottom attached tab segment preset-'+number+'" id="preset-'+number+'" data-tab="preset-'+number+'"><p>Preset '+number+' media elements</p><div class="ui styled fluid accordion" style="margin: 0 0 1em" id="preset-accordion-'+number+'"></div><button class="ui icon button" onclick="addAccordion(this);"><i class="plus icon"></i></button>';
+
+		return tab;
+	}
+
 	// PRESET ACCORDION
 	function fillPresetAccordion(presetObject) {
-		var presetAccordion = document.getElementById("presetAccordion");
-		
 		for (var i = 1; i <= 6; i++) {
-			if (document.getElementById("preset"+i)) {
-				console.log("preset"+i+" exists!");
-				presetAccordion.removeChild(document.getElementById("preset"+i));
+			var presetAccordion = document.getElementById("preset-accordion-"+i);
+			if (presetAccordion.childNodes.length > 0) {
+				console.log('already added accordion items');
+				//TODO: remove
 			}
-			
-			presetAccordion.append(getPresetAccordionForm(presetObject['preset'+i], i));
+
+			console.log(presetObject['preset'+i]);
+
+			presetObject['preset'+i].forEach(function(mediaElement){
+				presetAccordion.append(getPresetAccordionForm(mediaElement));
+			});
 		}
-		
 		$('.ui.dropdown')
 		  	.dropdown()
 		;
 	}
 	
-	function getPresetAccordionForm(preset, presetNumber) {
+	function getPresetAccordionForm(preset) {
 		console.log('preset: ' + preset)
-		var innerHtml = '<div class="title"><i class="dropdown icon"></i>Preset '+presetNumber+'<div class="ui toggle checkbox" style="float: right;"><input type="checkbox" tabindex="0" class="hidden"><label> </label></div></div><div class="content"><p class="transition hidden"><div class="ui segment"><div class="ui fluid form"><div class="two fields"><div class="field"><label>Media title</label><input placeholder="My radio station" type="text" class="mediaTitle" value="'+preset["mediaTitle"]+'"></div><div class="field"><label>Media subtitle</label><input placeholder="The best station in town" type="text" class="mediaSubtitle" value="'+preset["mediaSubtitle"]+'"></div></div><div class="two fields"><div class="field"><label>Media type</label><div class="ui selection dropdown"><input type="hidden" name="mediaType" class="mediaType" value="'+preset["mediaType"]+'"><i class="dropdown icon"></i><div class="default text">mediaType</div><div class="menu"><div class="item" data-value="1">audio/mp3</div><div class="item" data-value="0">video/mp4</div></div></div></div><div class="field"><label>Media URL</label><input placeholder="Last Name" type="text" class="mediaUrl" value="'+preset["mediaUrl"]+'"></div></div><div class="two fields"><div class="field"><label>Media streamtype</label><div class="ui selection dropdown"><input type="hidden" name="mediaStreamType" class="mediaStreamType" value="'+preset["mediaStreamType"]+'"><i class="dropdown icon"></i><div class="default text">Media streamtype</div><div class="menu"><div class="item" data-value="1">LIVE</div><div class="item" data-value="0">BUFFERED</div></div></div></div><div class="field"><label>Media image URL</label><input placeholder="mediaImageUrl" type="text" class="mediaImageUrl" value="'+preset["mediaImageUrl"]+'"></div></div></div></div></p></div>'
+		var innerHtml = '<div class="title"><i class="dropdown icon"></i>Media element<button type="button" class="ui icon tiny button" style="float:right;margin-top: -0.35em;" onclick="removeAccordion(this);"><i class="trash icon"></i></button></div><div class="content"><p class="transition hidden"><div class="ui segment"><div class="ui fluid form"><div class="two fields"><div class="field"><label>Media title</label><input placeholder="My radio station" type="text" class="mediaTitle" value="'+preset["mediaTitle"]+'"></div><div class="field"><label>Media subtitle</label><input placeholder="The best station in town" type="text" class="mediaSubtitle" value="'+preset["mediaSubtitle"]+'"></div></div><div class="two fields"><div class="field"><label>Media type</label><div class="ui selection dropdown"><input type="hidden" name="mediaType" class="mediaType" value="'+preset["mediaType"]+'"><i class="dropdown icon"></i><div class="default text"></div><div class="menu"><div class="item" data-value="1">audio/mp3</div><div class="item" data-value="0">video/mp4</div></div></div></div><div class="field"><label>Media URL</label><input placeholder="Last Name" type="text" class="mediaUrl" value="'+preset["mediaUrl"]+'"></div></div><div class="two fields"><div class="field"><label>Media streamtype</label><div class="ui selection dropdown"><input type="hidden" name="mediaStreamType" class="mediaStreamType" value="'+preset["mediaStreamType"]+'"><i class="dropdown icon"></i><div class="default text"></div><div class="menu"><div class="item" data-value="1">LIVE</div><div class="item" data-value="0">BUFFERED</div></div></div></div><div class="field"><label>Media image URL</label><input placeholder="mediaImageUrl" type="text" class="mediaImageUrl" value="'+preset["mediaImageUrl"]+'"></div></div></div></div></p></div>'
 		var form = document.createElement("form");
 		form.innerHTML = innerHtml;
-		form.id = "preset"+presetNumber;
+		form.className = "mediaElement";
 		return form;
 	}
+
+	function addAccordion(context) {
+		$(context).parent().find('.ui.accordion').append(getPresetAccordionForm( getDefaultMediaElement() ));
+		$('.ui.dropdown')
+		  	.dropdown()
+		;
+	};
+
+	function removeAccordion(context) {
+		$(context).parent().parent().remove();
+	};
 </script>
 
 <!--
