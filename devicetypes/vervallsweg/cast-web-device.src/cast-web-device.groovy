@@ -312,7 +312,15 @@ def parsePresets(def excluding=7) { //was: setDefaultPresets
             def key = "preset"+(i+1)
             def mediaTitle = "Preset "+(i+1)
             try {
-                mediaTitle = presets.get(key).get('mediaTitle')
+                if(presets.get(key)) {
+                    if(presets.get(key).mediaTitle) {
+                        logger('warn', key+" is old preset.")
+                        mediaTitle = presets.get(key).get('mediaTitle')
+                    } else {
+                        logger('info', key+" is new preset.")
+                        mediaTitle = presets.get(key)[0].get('mediaTitle')
+                    }
+                }
             } catch (Exception e) {
                 logger('debug', mediaTitle+" not set.")
             }
@@ -323,15 +331,16 @@ def parsePresets(def excluding=7) { //was: setDefaultPresets
 }
 
 def setDefaultPresetObject() {
-    def defaultObject = '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}'
+    //def defaultObject = '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}'
+    def defaultObject = '{"preset1":[{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset2":[{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset3":[{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset4":[{"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset5":[{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}],"preset6":[{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}]}';
     updateDataValue("presetObject", defaultObject)
 }
 
 def playPreset(number) {
-    JSONObject preset = getPresetObject(number)
+    def preset = getPresetObject(number)
     
     if (preset) {
-        setMediaPlaybacks( "["+preset.toString()+"]" )
+        setMediaPlaybacks( preset.toString() )
     }   
 }
 
@@ -340,11 +349,25 @@ def getPresetObject(number) {
     def defaultMediaTitle = "Preset "+number
     logger('debug', "Executing 'playPreset': "+number+", key: "+key+", defaultMediaTitle: "+defaultMediaTitle)
     JSONObject presets = new JSONObject( getDataValue("presetObject") )
-    presets[key].put( "mediaSubtitle", (presets[key]["mediaSubtitle"]+" - Preset "+number) )
-    
-    if( presets.get(key).mediaTitle.equals(defaultMediaTitle) ) {
-        logger('debug', "'getPresetObject' key: "+key+", is default!")
-        return null
+    if(presets.get(key).mediaTitle) {
+        logger('debug', "getPresetObject() is old preset object")
+        presets[key].put( "mediaSubtitle", (presets[key]["mediaSubtitle"]+" - Preset "+number) )
+   
+        if( presets.get(key).mediaTitle.equals(defaultMediaTitle) ) {
+            logger('debug', "'getPresetObject' key: "+key+", is default!")
+            return null
+        }
+        def newP = [ presets.get(key) ];
+        presets.put(key, newP);
+    } else {
+        logger('debug', "getPresetObject() is new preset object")
+        presets[key].each {
+            it.put( "mediaSubtitle", (it["mediaSubtitle"]+" - Preset "+number) )
+        }
+        if( presets.get(key)[0].mediaTitle.equals(defaultMediaTitle) ) {
+            logger('debug', "'getPresetObject' key: "+key+", is default!")
+            return null
+        }
     }
     
     return presets.get(key)
@@ -463,7 +486,10 @@ def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false)
         }
     
         if (preset) {
-            data = data + ', '+preset.toString()
+            preset.each {
+                data = data + ', '+it.toString()
+            }
+            //data = data + ', '+preset.toString()
         }
     }
     data = "["+data+"]"

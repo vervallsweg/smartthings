@@ -1,4 +1,7 @@
 # Changelog
+##Version 1.1.0
+- Added: support for preset queues
+
 ##Version 1.0.0
 - Renamed to cast-web-device
 - Compatible with API version 1.0.0
