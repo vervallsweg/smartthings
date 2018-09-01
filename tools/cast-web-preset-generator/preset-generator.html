@@ -311,11 +311,11 @@
 	}
 
 	//VALIDATION
-	function validatePresetObject(presetObject) {
+	function validatePresetObject(presetObject, convert) {
 		try {
 			var parsed = JSON.parse(presetObject);
 			for (var i = 1; i <= 6; i++) {
-				var current = parsed['preset'+1];
+				var current = parsed['preset'+i];
 
 				if (!Array.isArray(current)) {
 					current = [ current ];
@@ -327,13 +327,17 @@
 						return false;
 					}
 				});
-				
+				parsed['preset'+i] = current;
 			}
 		} catch (e){
 			console.log("Exception: "+e);
 		}
 		if (i==7) {
-			return true;
+			if (convert) {
+				return parsed;
+			} else {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -362,7 +366,7 @@
 	}
 
 	function parsePresetObject(presetObject) {
-		return JSON.parse(presetObject);
+		return validatePresetObject(presetObject, true);
 	}
 
 	// MODALS
