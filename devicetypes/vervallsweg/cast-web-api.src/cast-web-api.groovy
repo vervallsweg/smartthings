@@ -46,7 +46,7 @@ metadata {
         valueTile("updateStatus", "device.updateStatus", width: 4, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkVersion"
         }
-        valueTile("assistantStatus", "device.assistantStatus", width: 4, height: 2) {
+        valueTile("assistantStatus", "device.assistantStatus", width: 6, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkAssistant"
         }
         //main "mainTile"
@@ -98,10 +98,10 @@ def parse(String description) {
             if (message.json.latest) {
                 vlatest = message.json.latest
             }
-            if (message.json.assistant) {
+            if (message.json.assistant!=null) {
                 assistant = message.json.assistant
             }
-            if (message.json.ready) {
+            if (message.json.ready!=null) {
                 ready = message.json.ready
             }
             if (vthis && vlatest) {
@@ -192,7 +192,10 @@ def checkAssistant() {
 def speak(phrase) {
     logger('info', "speak(), phrase: " + phrase)
     def host = getDataValue("apiHost")
-    sendHubCommand(new physicalgraph.device.HubAction("""GET /assistant/broadcast/$phrase HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+    def message = urlEncode(phrase)
+    def ha = new physicalgraph.device.HubAction("""GET /assistant/broadcast/$message HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host)
+    logger('debug', "speak(), ha: " + ha)
+    sendHubCommand(ha)
 }
 
 def playText(message, level = 0, resume = false) {
@@ -219,6 +222,10 @@ def setApiHost(apiHost) {
     children.each { child ->
         child.updateDataValue("apiHost", apiHost)
     }
+}
+
+def urlEncode(String) {
+    return java.net.URLEncoder.encode(String, "UTF-8").replace("+", "%20")
 }
 
 //DEBUGGING
