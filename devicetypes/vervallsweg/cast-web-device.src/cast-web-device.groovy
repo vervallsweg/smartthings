@@ -177,7 +177,7 @@ def updated() {
 }
 
 def refresh() {
-    apiCall('/subscribe', true)
+    apiCall('/', true);
 }
 
 // parse events into attributes
@@ -643,7 +643,7 @@ def sendHttpRequest(String host, String path, def defaultCallback=hubResponseRec
 
 def sendHttpPost(String host, String path, def data) {
     logger('debug', "Executing 'sendHttpPost' host: "+host+" path: "+path+" data: "+data+" data.length():"+data.length()+1)
-    def ha = new physicalgraph.device.HubAction("""POST ${path} HTTP/1.1\r\nHOST: $host\r\nContent-Length:${data.length()+1}\r\n\r\n ${data}""", physicalgraph.device.Protocol.LAN, host, [callback: hubResponseReceived])
+    def ha = new physicalgraph.device.HubAction("""POST ${path} HTTP/1.1\r\nHOST: $host\r\nContent-Type: application/json\r\nContent-Length:${data.length()+1}\r\n\r\n ${data}""", physicalgraph.device.Protocol.LAN, host, [callback: hubResponseReceived])
     logger('debug', "HubAction: "+ha)
     sendHubCommand(ha)
 }

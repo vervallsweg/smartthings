@@ -56,10 +56,10 @@ metadata {
 
 // parse events into attributes
 def parse(String description) {
-    //logger('debug', "Parsing: "+description)
+    //er('debug', "Parsing: "+description)
     def message = parseLanMessage(description)
     def children = getChildDevices()
-    logger('debug', "Parsing json: "+message.json)
+    logger('debug', "Parsing json: "+message.json + ", status"+message.status)
     
     if(message.json) {
         if(message.json.id) {
@@ -87,29 +87,17 @@ def parse(String description) {
             if(!foundTarget) {
                 logger('error', "Parsing found no target for: "+message.json.id)
             }
-        } else {
-            def vthis, vlatest
-            def assistant = null
-            def ready = null
-            
-            if (message.json.this) {
-                vthis = message.json.this
+        }
+        if(message.json.api) {
+            if(message.json.api.version) {
+                if (message.json.api.version.this && message.json.api.version.latest) {
+                    sendEvent(name: "updateStatus", value: ("Current: "+ message.json.api.version.this + "\nLatest: " + message.json.api.version.latest), displayed: false)
+                }
             }
-            if (message.json.latest) {
-                vlatest = message.json.latest
-            }
-            if (message.json.assistant!=null) {
-                assistant = message.json.assistant
-            }
-            if (message.json.ready!=null) {
-                ready = message.json.ready
-            }
-            if (vthis && vlatest) {
-                sendEvent(name: "updateStatus", value: ("Current: "+ vthis + "\nLatest: " + vlatest), displayed: false)
-            }
-            if (assistant!=null && ready!=null) {
-                sendEvent(name: "assistantStatus", value: ("Assistant: "+ assistant + "\nready: " + ready + "\nIf you never used Google Assistant with cast-web go to service manager > Setup Google Assistant"), displayed: false)
-            }
+        }
+        if(message.json.containsKey("assistant") && message.json.containsKey("ready")) {
+            logger('debug', "containsKey")
+            sendEvent(name: "assistantStatus", value: ("Assistant: "+ message.json.assistant + "\nready: " + message.json.ready + "\nIf you never used Google Assistant with cast-web go to service manager > Setup Google Assistant"), displayed: false)   
         }
     }
 }
@@ -124,9 +112,9 @@ def updated() {
 }
 
 def refresh() {
-    getChildDevices().each { child ->
-        child.refresh()
-    }
+    def hub = location.hubs[0];
+    sendHttpRequest("POST", getDataValue("apiHost"), "/callback", '[{"url":"'+hub.localIP+':'+hub.localSrvPortTCP+'", "settings":""}]');
+    getChildDevices().each{child -> child.refresh()}
 }
 
 def installDevices(ids) {
@@ -180,22 +168,17 @@ def parseListFromString(string) {
 }
 
 def checkVersion() {
-    def host = getDataValue("apiHost")
-    sendHubCommand(new physicalgraph.device.HubAction("""GET /config/version HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+    sendHttpRequest("GET", getDataValue("apiHost"), "/config", "");
+    //sendHttpTest(getDataValue("apiHost"), "/config")
 }
 
 def checkAssistant() {
-    def host = getDataValue("apiHost")
-    sendHubCommand(new physicalgraph.device.HubAction("""GET /assistant HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+    sendHttpRequest("GET", getDataValue("apiHost"), "/assistant", "");
 }
 
 def speak(phrase) {
     logger('info', "speak(), phrase: " + phrase)
-    def host = getDataValue("apiHost")
-    def message = urlEncode(phrase)
-    def ha = new physicalgraph.device.HubAction("""GET /assistant/broadcast/$message HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host)
-    logger('debug', "speak(), ha: " + ha)
-    sendHubCommand(ha)
+    sendHttpRequest("POST", getDataValue("apiHost"), "/assistant/broadcast/", '{"message":"'+message+'"}');
 }
 
 def playText(message, level = 0, resume = false) {
@@ -224,8 +207,11 @@ def setApiHost(apiHost) {
     }
 }
 
-def urlEncode(String) {
-    return java.net.URLEncoder.encode(String, "UTF-8").replace("+", "%20")
+def sendHttpRequest(String method, String host, String path, def body="") {
+    logger('debug', "Executing 'sendHttpRequest' method: "+method+" host: "+host+" path: "+path+" body: "+body)
+    def bodyHead = "";
+    if(!body.equals("")) bodyHead = "Content-Type: application/json\r\nContent-Length:${body.length()+1}\r\n";
+    sendHubCommand(new physicalgraph.device.HubAction("""${method} ${path} HTTP/1.1\r\nHOST: $host\r\n${bodyHead}\r\n${body}""", physicalgraph.device.Protocol.LAN, host))
 }
 
 //DEBUGGING
