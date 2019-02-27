@@ -210,7 +210,10 @@ def setApiHost(apiHost) {
 def sendHttpRequest(String method, String host, String path, def body="") {
     logger('debug', "Executing 'sendHttpRequest' method: "+method+" host: "+host+" path: "+path+" body: "+body)
     def bodyHead = "";
-    if(!body.equals("")) bodyHead = "Content-Type: application/json\r\nContent-Length:${body.length()+1}\r\n";
+    if(!body.equals("")) {
+        bodyHead = "Content-Type: application/json\r\nContent-Length:${body.length()+1}\r\n";
+        body = " "+body;
+    }
     sendHubCommand(new physicalgraph.device.HubAction("""${method} ${path} HTTP/1.1\r\nHOST: $host\r\n${bodyHead}\r\n${body}""", physicalgraph.device.Protocol.LAN, host))
 }
 
