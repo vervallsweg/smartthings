@@ -178,7 +178,7 @@ def checkAssistant() {
 
 def speak(phrase) {
     logger('info', "speak(), phrase: " + phrase)
-    sendHttpRequest("POST", getDataValue("apiHost"), "/assistant/broadcast/", '{"message":"'+message+'"}');
+    sendHttpRequest("POST", getDataValue("apiHost"), "/assistant/broadcast/", '{"message":"'+phrase+'"}');
 }
 
 def playText(message, level = 0, resume = false) {
