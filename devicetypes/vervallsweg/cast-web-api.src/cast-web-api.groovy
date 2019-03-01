@@ -183,17 +183,17 @@ def speak(phrase) {
 
 def playText(message, level = 0, resume = false) {
     logger('info', "playText, message: " + message + " level: " + level)
-    return speak(message, true)
+    return speak(message)
 }
 
 def playTextAndResume(message, level = 0, thirdValue = 0) {
     logger('info', "playTextAndResume, message: " + message + " level: " + level)
-    return speak(message, true)
+    return speak(message)
 }
 
 def playTextAndRestore(message, level = 0, thirdValue = 0) {
     logger('info', "playTextAndRestore, message: " + message + " level: " + level)
-    return speak(message, true)
+    return speak(message)
 }
 
 def setApiHost(apiHost) {
