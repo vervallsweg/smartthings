@@ -112,7 +112,14 @@ def updated() {
 }
 
 def refresh() {
+    unschedule(refreshAll)
+    refreshAll()
+    runEvery5Minutes(refreshAll)
+}
+
+def refreshAll() {
     def hub = location.hubs[0];
+    //sendHttpRequest("GET", getDataValue("apiHost"), "/device", '');
     sendHttpRequest("POST", getDataValue("apiHost"), "/callback", '[{"url":"'+hub.localIP+':'+hub.localSrvPortTCP+'", "settings":""}]');
     getChildDevices().each{child -> child.refresh()}
 }
