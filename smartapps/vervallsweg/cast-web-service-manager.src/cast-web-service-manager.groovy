@@ -43,6 +43,7 @@ def mainPage() {
             input "apiHostAddress", "string", title: "API host address", required: true
             href "updateServiceManagerPage", title: "Check for updates", description:""
             href "checkApiConnectionPage", title: "Test API connection", description:""
+            href "setupGoogleAssistant",title: "Setup the Google Assistant with cast-web to broadcast messages", required: false, style: "external", url: "http://"+apiHostAddress+"/assistant/setup/", description: ""
         }
         section("Configure Cast devices"){
             input(name: "settingsLogLevel", type: "enum", title: "Service manager log level", options: [0, 1, 2, 3, 4])
@@ -244,6 +245,16 @@ def updated() {
 
 def initialize() {
     // TODO: subscribe to attributes, devices, locations, etc.
+    getChildDevices().each {
+        if(it) {
+            log.info "it: "+it
+            try {
+                it.setApiHost(apiHostAddress);
+            } catch(e) {
+                log.info "Yeah, probably double exec error: "+e
+            }
+        }
+    }
 }
 
 def getDevices() {

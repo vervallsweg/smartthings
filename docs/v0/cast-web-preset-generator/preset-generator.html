@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Preset generator</title>
+
+  <link rel="stylesheet" type="text/css" href="semantic-ui/semantic.min.css">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="semantic-ui/semantic.min.js"></script>
+</head>
+<body>
+  <div class="ui basic modal" id="createInputObjectModal">
+	  <div class="ui icon header">
+	    <i class="warning sign icon"></i>
+	    Import invalid
+	  </div>
+	  <div class="content">
+	    <p style="text-align: center;">You've either imported no presets, or they are corrupted. Would you like to skip this step?</p>
+	  </div>
+	  <div class="actions">
+	    <div class="ui red basic cancel inverted button">
+	      <i class="remove icon"></i>
+	      No
+	    </div>
+	    <div class="ui blue basic ok inverted button" onclick="skipStep1()">
+	      Skip
+	      <i class="right arrow icon"></i>
+	    </div>
+	  </div>
+  </div>
+  <div class="ui text container" style="margin: 1em 0">
+      <h1 class="ui dividing header">Preset generator</h1>
+
+      <div class="ui ordered three steps">
+		  <a class="step active" id="steps_step1" onclick="step1()">
+		    <div class="content">
+		      <div class="title">Import</div>
+		      <div class="description">From Smartapp</div>
+		    </div>
+		  </a>
+		  <a class="step" id="steps_step2" onclick="step2()">
+		    <div class="content">
+		      <div class="title">Edit</div>
+		      <div class="description">All of your presets</div>
+		    </div>
+		  </a>
+		  <a class="step" id="steps_step3" onclick="step3()">
+		    <div class="content">
+		      <div class="title">Save</div>
+		      <div class="description">To Smartapp</div>
+		    </div>
+		  </a>
+	  </div>
+
+      	<div id="container_step_1" style="">
+	      <h2 class="first">1. Paste your current presets</h2>
+	      <div class="ui form">
+			  <div class="field">
+			    <label>Copy and paste from your Smartapp</label>
+			    <textarea id="preset_input" placeholder="Optional"></textarea>
+			  </div>
+			  <div class="ui animated white button" tabindex="0" onclick="skipStep1()">
+				<div class="visible content">Skip</div>
+				<div class="hidden content">
+					<i class="right arrow icon"></i>
+				</div>
+			  </div>
+			  <button class="ui primary right labeled icon button" style="float: right;" onclick="step2()">
+				<i class="right arrow icon"></i>
+				Edit
+			  </button>
+		  </div>
+	  </div>
+	  <div id="container_step_2" style="display: none">
+        <h2>2. Edit your presets</h2>
+     	<div class="ui styled fluid accordion" style="margin: 0 0 1em" id="presetAccordion">
+     		
+		</div>
+
+		<div class="ui animated negative button" tabindex="0" onclick="skipStep1()">
+			<div class="visible content">Reset</div>
+			<div class="hidden content">
+				<i class="right trash icon"></i>
+			</div>
+		</div>
+		<button class="ui primary right labeled icon button" style="float: right;" onclick="step3()">
+			<i class="right arrow icon"></i>
+			Save
+		</button>
+	  </div>
+
+	  <div id="container_step_3" style="display: none">
+	      <h2>3. Copy your new presets</h2>
+	  	  <div class="ui form">
+			  <div class="field">
+			    <label>Copy and paste your new presets into the Smartapp</label>
+			    <textarea id="preset_output"></textarea>
+			  </div>
+			  <div class="ui animated negative button" tabindex="0" onclick="skipStep1()">
+				<div class="visible content">Reset</div>
+				<div class="hidden content">
+					<i class="right trash icon"></i>
+				</div>
+			  </div>
+			  <button class="ui primary right labeled icon button" style="float: right;" onclick="copyOutputObjectToClipboard()" id="copyToClipboard">
+				<i class="right copy icon"></i>
+				Copy to clipboard
+			  </button>
+		  </div>
+	  </div>
+  </div>
+  <style type="text/css">
+
+  </style>
+</body>
+</html>
+<script type="text/javascript">
+	$('.ui.accordion')
+	 	.accordion()
+	;
+	$('#copyToClipboard')
+	  .popup()
+	;
+
+	var importObject, editObject, outputObject;
+	var currentStep = 1;
+
+	setImportObjectFromHeader();
+
+	// STEPS
+	function step1() {
+		setCurrentStep(1);
+	}
+
+	function skipStep1() {
+		setImportObjectInput(getDefaultPresetObject());
+		step2();
+	}
+
+	function step2() {
+		updateImportObjectInput();
+
+		if (validatePresetObject(importObject)) {
+			console.log('Step 2: valid.')
+			setCurrentStep(2);
+			setEditObject();
+			fillPresetAccordion(parsePresetObject(importObject));
+		} else {
+			console.log('Step 2: not valid.');
+			showCreateInputObjectModal();
+		}
+	}
+
+	function step3() {
+		if (validatePresetObject( getEditObjectFormJSON() )) {
+			console.log('Step 3: valid.');
+			outputObject = getEditObjectFormJSON();
+			setImportObjectInput( outputObject );
+			setOutputObject( outputObject );
+			setCurrentStep(3);
+		} else {
+			console.log('Step 3: not valid.')
+
+			//STEP 1-2 checks
+			if (validatePresetObject(importObject)) {
+				//MODAL REDO
+				console.log('Edited presets corrupted!')
+			} else {
+				showCreateInputObjectModal();
+			}
+			
+		}
+	}
+
+	function setCurrentStep(step) {
+		document.getElementById('container_step_'+currentStep).style = "display: none";
+		document.getElementById('container_step_'+step).style = "";
+
+		document.getElementById('steps_step'+currentStep).className = "step";
+		document.getElementById('steps_step'+step).className = "step active";
+		currentStep = step;
+	}
+
+	// STEP 1
+	function updateImportObjectInput() {
+		importObject = document.getElementById("preset_input").value;
+	}
+
+	function setImportObjectInput(presetObject) {
+		document.getElementById("preset_input").value = presetObject;
+	}
+
+	function setImportObjectFromHeader() {
+		var uriParameters = decodeURI(location.search.substr(1).split('&'));
+		if (uriParameters) { setImportObjectInput(uriParameters); }
+	}
+
+	// STEP 2
+	function setEditObject(presetObject) {
+		editObject = presetObject;
+	}
+
+	// STEP 3
+	function getEditObjectFormJSON() {
+		var presetAccordion = document.getElementById('presetAccordion');
+		var presetObject = {};
+
+		try {
+			for (var i = 1; i <= 6; i++) {
+				var currentForm = document.getElementById('preset'+i);
+				var mediaType = "";
+				var mediaStreamType = "";
+				try {
+					mediaType = currentForm.getElementsByClassName('mediaType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
+				} catch (e) {
+					console.log('mediaType not set');
+				}
+				try {
+					mediaStreamType = currentForm.getElementsByClassName('mediaStreamType')[0].parentElement.getElementsByClassName('selected')[0].textContent;
+				} catch (e) {
+					console.log('mediaType not set');
+				}
+				console.log('mediaTitle: '+ mediaType);
+				presetObject['preset'+i] = {
+					mediaTitle: currentForm.getElementsByClassName('mediaTitle')[0].value,
+					mediaSubtitle: currentForm.getElementsByClassName('mediaSubtitle')[0].value,
+					mediaType: mediaType,
+					mediaUrl: currentForm.getElementsByClassName('mediaUrl')[0].value,
+					mediaStreamType: mediaStreamType,
+					mediaImageUrl: currentForm.getElementsByClassName('mediaImageUrl')[0].value
+				};
+			}
+		} catch (e) {
+			console.log('Cannot getEditObjectFormJSON.');
+		}
+		return JSON.stringify(presetObject);
+	}
+	
+	function setOutputObject(presetObject) {
+		document.getElementById('preset_output').value = presetObject;
+	}	
+
+	function copyOutputObjectToClipboard() {
+		var preset_output = document.getElementById('preset_output');
+		try {
+			preset_output.select();
+			if(document.execCommand('copy')){
+				$('#copyToClipboard')
+				.popup({
+				    content : 'Done!'
+				})
+				.popup('show')
+				setTimeout(
+				 	function() {
+				    	$('#copyToClipboard')
+				    	.popup('destroy')
+				    }
+				, 2000);
+			} else {
+				throw 'execCommand result not true'
+			}
+		} catch (e) {
+			console.log('Unable to copy to clipboard: '+e);
+			$('#copyToClipboard')
+			.popup({
+			    content : "Unable to copy to clipboard!"
+			})
+			.popup('show')
+			setTimeout(
+			 	function() {
+			    	$('#copyToClipboard')
+			    	.popup('destroy')
+			    }
+			, 2000);
+		}
+	}
+
+	//VALIDATION
+	function validatePresetObject(presetObject) {
+		try {
+			var parsed = JSON.parse(presetObject);
+			for (var i = 1; i <= 6; i++) {
+				if(!validatePreset(parsed['preset'+1])){
+					console.log(i+"pre false");
+					return false;
+				}
+			}
+		} catch (e){
+			console.log("Exception: "+e);
+		}
+		if (i==7) {
+			return true;
+		}
+		return false;
+	}
+
+	function validatePreset(preset) {
+		if (preset['mediaTitle']!=null&&preset['mediaSubtitle']!=null&&preset['mediaType']!=null&&preset['mediaUrl']!=null&&preset['mediaStreamType']!=null&&preset['mediaImageUrl']!=null) {
+			return true;
+		}
+		return false;
+	}
+
+	// PRESETS
+	function getDefaultPresetObject() {
+		return '{"preset1":{"mediaTitle":"Preset 1","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset2":{"mediaTitle":"Preset 2","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset3":{"mediaTitle":"Preset 3","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset4": {"mediaTitle":"Preset 4","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset5":{"mediaTitle":"Preset 5","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""},"preset6":{"mediaTitle":"Preset 6","mediaSubtitle":"","mediaType":"","mediaUrl":"","mediaStreamType":"","mediaImageUrl":""}}';
+	}
+
+	function parsePresetObject(presetObject) {
+		return JSON.parse(presetObject);
+	}
+
+	// MODALS
+	function showCreateInputObjectModal() {
+		var modal = document.getElementById("createInputObjectModal");
+		$('.ui.basic.modal')
+  			.modal('show')
+		;
+	}
+
+	// PRESET ACCORDION
+	function fillPresetAccordion(presetObject) {
+		var presetAccordion = document.getElementById("presetAccordion");
+		
+		for (var i = 1; i <= 6; i++) {
+			if (document.getElementById("preset"+i)) {
+				console.log("preset"+i+" exists!");
+				presetAccordion.removeChild(document.getElementById("preset"+i));
+			}
+			
+			presetAccordion.append(getPresetAccordionForm(presetObject['preset'+i], i));
+		}
+		
+		$('.ui.dropdown')
+		  	.dropdown()
+		;
+	}
+	
+	function getPresetAccordionForm(preset, presetNumber) {
+		console.log('preset: ' + preset)
+		var innerHtml = '<div class="title"><i class="dropdown icon"></i>Preset '+presetNumber+'<div class="ui toggle checkbox" style="float: right;"><input type="checkbox" tabindex="0" class="hidden"><label> </label></div></div><div class="content"><p class="transition hidden"><div class="ui segment"><div class="ui fluid form"><div class="two fields"><div class="field"><label>Media title</label><input placeholder="My radio station" type="text" class="mediaTitle" value="'+preset["mediaTitle"]+'"></div><div class="field"><label>Media subtitle</label><input placeholder="The best station in town" type="text" class="mediaSubtitle" value="'+preset["mediaSubtitle"]+'"></div></div><div class="two fields"><div class="field"><label>Media type</label><div class="ui selection dropdown"><input type="hidden" name="mediaType" class="mediaType" value="'+preset["mediaType"]+'"><i class="dropdown icon"></i><div class="default text">mediaType</div><div class="menu"><div class="item" data-value="1">audio/mp3</div><div class="item" data-value="0">video/mp4</div></div></div></div><div class="field"><label>Media URL</label><input placeholder="Last Name" type="text" class="mediaUrl" value="'+preset["mediaUrl"]+'"></div></div><div class="two fields"><div class="field"><label>Media streamtype</label><div class="ui selection dropdown"><input type="hidden" name="mediaStreamType" class="mediaStreamType" value="'+preset["mediaStreamType"]+'"><i class="dropdown icon"></i><div class="default text">Media streamtype</div><div class="menu"><div class="item" data-value="1">LIVE</div><div class="item" data-value="0">BUFFERED</div></div></div></div><div class="field"><label>Media image URL</label><input placeholder="mediaImageUrl" type="text" class="mediaImageUrl" value="'+preset["mediaImageUrl"]+'"></div></div></div></div></p></div>'
+		var form = document.createElement("form");
+		form.innerHTML = innerHtml;
+		form.id = "preset"+presetNumber;
+		return form;
+	}
+</script>
+
+<!--
+# Preset generator
+Generate presets for your Google Cast devices in Smartthings.
+## What are presets?
+They can be used to quickly play your favorite content from the Smartthings app. Furthermore you can use them to automate your cast devices, use them with Smartapps, routines, CoRE, you name it.
+## Limitations
+Due to the way the Google Cast protocol works, you're limited to the default media receiver. This means you can only play DRM free content, such as mp3/mp4 files/streams. For more information about what you can play visit the [web-api's documentation](https://github.com/vervallsweg/cast-web-api#setmediaplayback-address-mediatype-mediaurl-mediastreamtype-mediatitle-mediasubtitle-mediaimageurl "web-api's documentation"), it will link you to everything you should know.
+## 1. Paste your current presets (optional)
+<input type="text" name="current_preset" name="current_preset">
+<button>Skip this step</button><button>Next</button>
+## 2. Edit your presets
+<input type="text" name="blah">
+## 3. Copy your new presets
+<input type="text" name="output_preset">
+<button>Copy to clipboard</button>
+-->

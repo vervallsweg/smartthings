@@ -16,15 +16,20 @@
  preferences {
     input("configLoglevel", "enum", title: "Log level?",
         required: false, multiple:false, value: "nothing", options: ["0","1","2","3","4"])
+    input("syncNamesFromAPI", "bool", title: "Don't sync cast-device names from API?", required: false)
 }
  
 metadata {
     definition (name: "cast-web-api", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
+        capability "Audio Notification"
         capability "Bridge"
         capability "Refresh"
+        capability "Speech Synthesis"
         
+        command "checkAssistant"
         command "checkVersion"
+        command "setApiHost", ["string"]
     }
 
     simulator {
@@ -41,17 +46,20 @@ metadata {
         valueTile("updateStatus", "device.updateStatus", width: 4, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkVersion"
         }
+        valueTile("assistantStatus", "device.assistantStatus", width: 6, height: 2) {
+            state "val", label:'${currentValue}', defaultState: true, action: "checkAssistant"
+        }
         //main "mainTile"
-        details(["mainTile", "refresh", "updateStatus"])
+        details(["mainTile", "refresh", "updateStatus", "assistantStatus"])
     }
 }
 
 // parse events into attributes
 def parse(String description) {
-    //logger('debug', "Parsing: "+description)
+    //er('debug', "Parsing: "+description)
     def message = parseLanMessage(description)
     def children = getChildDevices()
-    logger('debug', "Parsing json: "+message.json)
+    logger('debug', "Parsing json: "+message.json + ", status"+message.status)
     
     if(message.json) {
         if(message.json.id) {
@@ -61,7 +69,9 @@ def parse(String description) {
                     foundTarget = true;
                     logger('debug', "Parsing found target name: "+child.displayName+", dni: "+child.deviceNetworkId)
                     if(message.json.name) {
-                        child.displayName = message.json.name
+                        if(settings.syncNamesFromAPI != true) {
+                            child.displayName = message.json.name
+                        }
                     }
                     //if(message.json.connection) { //WTF: cannot be set by dev?!
                     //    if( message.json.connection.equals("connected") ) {
@@ -77,17 +87,17 @@ def parse(String description) {
             if(!foundTarget) {
                 logger('error', "Parsing found no target for: "+message.json.id)
             }
-        } else {
-            def vthis, vlatest
-            if (message.json.this) {
-                vthis = message.json.this
+        }
+        if(message.json.api) {
+            if(message.json.api.version) {
+                if (message.json.api.version.this && message.json.api.version.latest) {
+                    sendEvent(name: "updateStatus", value: ("Current: "+ message.json.api.version.this + "\nLatest: " + message.json.api.version.latest), displayed: false)
+                }
             }
-            if (message.json.latest) {
-                vlatest = message.json.latest
-            }
-            if (vthis && vlatest) {
-                sendEvent(name: "updateStatus", value: ("Current: "+ vthis + "\nLatest: " + vlatest), displayed: false)
-            }
+        }
+        if(message.json.containsKey("assistant") && message.json.containsKey("ready")) {
+            logger('debug', "containsKey")
+            sendEvent(name: "assistantStatus", value: ("Assistant: "+ message.json.assistant + "\nready: " + message.json.ready + "\nIf you never used Google Assistant with cast-web go to service manager > Setup Google Assistant"), displayed: false)   
         }
     }
 }
@@ -102,9 +112,16 @@ def updated() {
 }
 
 def refresh() {
-    getChildDevices().each { child ->
-        child.refresh()
-    }
+    unschedule(refreshAll)
+    refreshAll()
+    runEvery5Minutes(refreshAll)
+}
+
+def refreshAll() {
+    def hub = location.hubs[0];
+    //sendHttpRequest("GET", getDataValue("apiHost"), "/device", '');
+    sendHttpRequest("POST", getDataValue("apiHost"), "/callback", '[{"url":"'+hub.localIP+':'+hub.localSrvPortTCP+'", "settings":""}]');
+    getChildDevices().each{child -> child.refresh()}
 }
 
 def installDevices(ids) {
@@ -158,10 +175,54 @@ def parseListFromString(string) {
 }
 
 def checkVersion() {
-    def host = getDataValue("apiHost")
-    sendHubCommand(new physicalgraph.device.HubAction("""GET /config/version HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host))
+    sendHttpRequest("GET", getDataValue("apiHost"), "/config", "");
+    //sendHttpTest(getDataValue("apiHost"), "/config")
 }
 
+def checkAssistant() {
+    sendHttpRequest("GET", getDataValue("apiHost"), "/assistant", "");
+}
+
+def speak(phrase) {
+    logger('info', "speak(), phrase: " + phrase)
+    sendHttpRequest("POST", getDataValue("apiHost"), "/assistant/broadcast/", '{"message":"'+phrase+'"}');
+}
+
+def playText(message, level = 0, resume = false) {
+    logger('info', "playText, message: " + message + " level: " + level)
+    return speak(message)
+}
+
+def playTextAndResume(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndResume, message: " + message + " level: " + level)
+    return speak(message)
+}
+
+def playTextAndRestore(message, level = 0, thirdValue = 0) {
+    logger('info', "playTextAndRestore, message: " + message + " level: " + level)
+    return speak(message)
+}
+
+def setApiHost(apiHost) {
+    log.warn "apiHost: "+apiHost
+    logger('info', 'setApiHost(), to: '+apiHost)
+    updateDataValue("apiHost", apiHost)
+    
+    def children = getChildDevices()
+    children.each { child ->
+        child.updateDataValue("apiHost", apiHost)
+    }
+}
+
+def sendHttpRequest(String method, String host, String path, def body="") {
+    logger('debug', "Executing 'sendHttpRequest' method: "+method+" host: "+host+" path: "+path+" body: "+body)
+    def bodyHead = "";
+    if(!body.equals("")) {
+        bodyHead = "Content-Type: application/json\r\nContent-Length:${body.length()+1}\r\n";
+        body = " "+body;
+    }
+    sendHubCommand(new physicalgraph.device.HubAction("""${method} ${path} HTTP/1.1\r\nHOST: $host\r\n${bodyHead}\r\n${body}""", physicalgraph.device.Protocol.LAN, host))
+}
 
 //DEBUGGING
 def logger(level, message) {

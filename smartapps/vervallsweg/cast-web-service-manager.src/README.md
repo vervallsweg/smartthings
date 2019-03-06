@@ -1,4 +1,9 @@
 # Changelog
+
+## Version 1.1.0
+- Added: apiHostAddress now updates when you change it
+- Added: Google Assistant setup link
+
 ## Version 1.0.0
 - Compatible with API version 1.0.0
 - Removed polling options
