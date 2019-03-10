@@ -306,7 +306,7 @@ def parse(description) {
 
 //UPDATE
 def getThisVersion() {
-    return '1.0.0'
+    return '1.1.0'
 }
 
 def getLatestVersion() {
