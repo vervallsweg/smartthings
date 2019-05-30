@@ -1,4 +1,8 @@
 # Changelog
+
+## Version 1.2.0
+- Just a version bump to match new cast-web-api version
+
 ## Version 1.1.0
 - Added: support for preset queues
 

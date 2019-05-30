@@ -1,4 +1,8 @@
 # Changelog
+
+## 1.2.0
+- Just a version bump to match new cast-web-api version
+
 ## 1.1.0
 - Added: switch to enable/disable name sync
 - Added: .setApiHost() function
