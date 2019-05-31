@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.2.0
+- Just a version bump to match new cast-web-api version
+
 ## Version 1.1.0
 - Added: apiHostAddress now updates when you change it
 - Added: Google Assistant setup link

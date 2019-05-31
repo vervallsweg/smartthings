@@ -680,7 +680,7 @@ def selectableAction(action) {
 
 //UPDATE
 def getThisVersion() {
-    return "1.1.0"
+    return "1.2.0"
 }
 
 def getLatestVersion() {
