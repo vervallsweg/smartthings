@@ -40,7 +40,7 @@ def mainPage() {
     if(state.latestHttpResponse){state.latestHttpResponse = null;}
     dynamicPage(name: "mainPage", title: "Manage your Cast devices", nextPage: null, uninstall: true, install: true) {
         section("Configure web API"){
-            input "apiHostAddress", "string", title: "API host address", required: true
+            input(name: "apiHostAddress", type: "text", title: "API host address", required: true, description: "")
             href "updateServiceManagerPage", title: "Check for updates", description:""
             href "checkApiConnectionPage", title: "Test API connection", description:""
             href "setupGoogleAssistant",title: "Setup the Google Assistant with cast-web to broadcast messages", required: false, style: "external", url: "http://"+apiHostAddress+"/assistant/setup/", description: ""
@@ -65,7 +65,7 @@ def checkApiConnectionPage() {
     dynamicPage(name:"checkApiConnectionPage", title:"Test API connection", nextPage: "mainPage", refreshInterval:10) {
         getDevices() //TODO: get root and only check status
         logger('debug', "checkApiConnectionPage(), refresh")
-        
+
         section("Please wait for the API to answer, this might take a couple of seconds.") {
             if(state.latestHttpResponse) {
                 if(state.latestHttpResponse==200) {
@@ -82,7 +82,7 @@ def discoveryPage() {
     dynamicPage(name:"discoveryPage", title:"Discovery Started!", nextPage: "addDevicesPage", refreshInterval:10) {
         getDevices()
         logger('debug', "discoveryPage(), refresh")
-        
+
         section("Please wait while we discover your Cast devices. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered.") {
             if(state.devicesMap!=null && state.devicesMap.size()>0) {
                 input "selectedDevices", "enum", required:false, title:"Select Cast Device ("+ state.devicesMap.size() +" found)", multiple:true, options: state.devicesMap
@@ -92,14 +92,14 @@ def discoveryPage() {
                 //state.selectedDevicesMap = null
             }
         }
-        
+
         //state.latestDeviceMap = null
     }
 }
 
 def addDevicesPage() {
     def addedDevices = addDevices(selectedDevices)
-    
+
     dynamicPage(name:"addDevicesPage", title:"Done", nextPage: null, uninstall: false, install: true) {
         section("Devices added") {
             if( !addedDevices.equals("0") ) {
@@ -116,12 +116,12 @@ def addDevicesPage() {
 def addDevices(selectedDevices) {
     def addedDevices = [:]
     logger('debug', "selectedDevices: "+selectedDevices+" childDevices: " + getChildDevices().size() )
-        
+
     if(selectedDevices && selectedDevices!=null) {
-        
+
         if(getChildDevices().size()<1) {
             logger('debug', "No cast-web-api installed" )
-            
+
             if(state.latestHttpMac) {
                 addChildDevice("vervallsweg", "cast-web-api", ""+state.latestHttpMac, location.hubs[0].id, [
                     "label": "cast-web-api",
@@ -134,18 +134,18 @@ def addDevices(selectedDevices) {
                 addedDevices.put('Error', "The cast-web-api doesn't retun it's MAC address. No devices were added.")
             }
         }
-        
+
         selectedDevices.each { key ->
             logger('debug', "Selected device id: " + key + ", name: " + state.devicesMap[key] )
             addedDevices.put(key, state.devicesMap[key])
         }
-        
+
         getChildDevices().each {
             it.updateDataValue("devices", ""+selectedDevices);
             it.updated()
         }
     }
-    
+
     if(addedDevices==[:]) {
         return "0"
     } else {
@@ -164,10 +164,10 @@ def configureDevicePage(dni) {
     }
     logger('debug', "configureDevicePage() selected device d: " + d)
     state.configCurrentDevice = d.deviceNetworkId
-    
+
     if(d){
         resetFormVar(d)
-    
+
         dynamicPage(name: "configureDevicePage", title: "Configure "+d.displayName+" ("+d.deviceNetworkId+")", nextPage: "saveDeviceConfigurationPage") {
             section("Connection settings") {
                 input(name: "api_host_address", type: "text", title: "cast-web-api address", defaultValue: [d.getDataValue("apiHost")], required: true)
@@ -179,7 +179,7 @@ def configureDevicePage(dni) {
         }
     } else {
         dynamicPage(name: "configureDevicePage", title: "Error", nextPage: "mainPage") {
-            section("Something went wrong"){ 
+            section("Something went wrong"){
                 paragraph "Cannot access the device"
             }
         }
@@ -196,7 +196,7 @@ def saveDeviceConfigurationPage() {
         }
     }
     logger('debug', "saveDeviceConfigurationPage() writing configuration for d: " + d)
-    
+
     //d.displayName = label
     //d.updateDataValue("deviceType", device_type)
     //d.updateDataValue("pollMinutes", ""+poll_minutes)
@@ -206,7 +206,7 @@ def saveDeviceConfigurationPage() {
     d.updateDataValue("presetObject", presetObject)
     //d.updateDataValue("logLevel", ""+log_level)
     d.updated()
-    
+
     dynamicPage(name: "saveDeviceConfigurationPage", title: "Configuration updated for: "+d.deviceNetworkId, nextPage: "mainPage") {
         section("Device name"){ paragraph ""+d.displayName }
         //section("Device type"){ paragraph ""+d.getDataValue("deviceType") }
@@ -273,7 +273,7 @@ void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
 
 def parse(description) {
     logger('debug', "Parsing '${description}'")
-    
+
     def msg, json, status, mac
     try {
         msg = parseLanMessage(description)
@@ -284,19 +284,19 @@ def parse(description) {
         logger("error", "Exception caught while parsing data: "+e)
         return null;
     }
-  
+
     state.latestHttpResponse = status
     state.latestHttpMac = mac
     if(status==200){
         def length = 0
         logger('debug', "JSON rcvd: "+json+", JSON.size: "+json.size)
-        
+
         def devices = [:]
         for(int i=0; i<json.size; i++) {
             logger('debug', "index "+ i +": "+json[i]['name']+", "+ json[i]['id'])
             devices.put(json[i]['id'], json[i]['name'])
         }
-       
+
         logger('debug', "devices: " + devices)
         state.devicesMap = devices
     } else {
@@ -315,7 +315,7 @@ def getLatestVersion() {
             logger('debug', "getLatestVersion(), response status: ${resp.status}")
             String data = "${resp.getData()}"
             logger('debug', "getLatestVersion(), data: ${data}")
-            
+
             if(resp.status==200 && data!=null) {
                 return parseJson(data)
             } else {

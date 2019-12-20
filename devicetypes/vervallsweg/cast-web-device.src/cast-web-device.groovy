@@ -16,23 +16,18 @@
 import org.json.JSONObject
 
 preferences {
-    input("configOn", "enum", title: "Switch on does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configOff", "enum", title: "Switch off does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configNext", "enum", title: "Next song does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Next preset","Previous preset","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configPrev", "enum", title: "Previous song does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Next preset","Previous preset","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?",
-        required: false, multiple:false, value: "nothing", options: ["1","2","3","4","5","6"])
-    input("configLoglevel", "enum", title: "Log level?",
-        required: false, multiple:false, value: "nothing", options: ["0","1","2","3","4"])
-    input("googleTTS", "bool", title: "Use Google's TTS voice?", required: false)
-    input("googleTTSLanguage", "enum", title: "Google TTS language?",
-        required: false, multiple:false, value: "nothing", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"])
+  section {
+        input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "Play", required: false, displayDuringSetup: false)
+        input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "Stop", required: false, displayDuringSetup: false)
+        input("configNext", "enum", title: "Next song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+        input("configPrev", "enum", title: "Previous song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+        input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?", description: "Tap to set", options: ["1","2","3","4","5","6"], defaultValue: "", required: false, displayDuringSetup: false)
+        input("configLoglevel", "enum", title: "Log level?", description: "Tap to set", options: ["1","2","3","4"], defaultValue: "", required: false, displayDuringSetup: false)
+        input("googleTTS", "bool", title: "Use Google's TTS voice?", description: "Tap to set", required: false, displayDuringSetup: false)
+        input("googleTTSLanguage", "enum", title: "Google TTS language?", description: "Tap to set", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"], defaultValue: "", required: false, displayDuringSetup: false)
+    }
 }
- 
+
 metadata {
     definition (name: "cast-web-device", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
@@ -95,50 +90,50 @@ metadata {
                 attributeState("trackDescription", label:"${currentValue}", defaultState: true)
             }
         }
-        
+
         standardTile("updateDeviceStatus", "device.connection", width: 2, height: 2, decoration: "flat") {
             state "val", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#ffffff", defaultState: true
             state "disconnected", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#e86d13", defaultState: false
         }
-        
+
         standardTile("stop", "device", width: 2, height: 2, decoration: "flat") {
             state "val", label: '', action: "music Player.stop", icon: "st.sonos.stop-btn", backgroundColor: "#ffffff", defaultState: true
         }
-        
+
         valueTile("updateStatus", "device.updateStatus", width: 2, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkForUpdate"
         }
-        
+
         standardTile("preset1", "device.preset1Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset1', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset1', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset2", "device.preset2Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset2', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset2', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset3", "device.preset3Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset3', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset3', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset4", "device.preset4Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset4', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset4', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset5", "device.preset5Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset5', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset5', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset6", "device.preset6Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset6', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset6', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         main "mediaMulti"
         details(["mediaMulti",
                 "updateDeviceStatus",
@@ -158,7 +153,7 @@ metadata {
 def installed() {
     logger('debug', "Executing 'installed'")
     log.debug "installed"
-    
+
     //Preset, update-status tiles
     refresh()
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
@@ -169,7 +164,7 @@ def installed() {
 def updated() {
     logger('debug', "Executing 'updated'")
     log.debug "updated"
-    
+
     //Preset, update-status tiles
     refresh()
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
@@ -186,7 +181,7 @@ def parse(String description) {
         logger('debug', "'parse', parsing: '${description}'")
         def msg = parseLanMessage(description)
         logger('debug', 'parse, msg.json: ' + msg.json)
-        
+
         if(msg.json!=null){
             if(!msg.json.response) {
                 if(msg.json.status) {
@@ -274,7 +269,7 @@ def restoreTrack(trackToSet) {
 def removePresetMediaSubtitle(mediaSubtitle) {
     if( isPreset(mediaSubtitle) ) {
         setTrackData( ["preset":getPresetNumber(mediaSubtitle)] )
-        logger('debug', "'removePresetMediaSubtitle, new: '" + mediaSubtitle.substring(0, mediaSubtitle.length()-10) ) 
+        logger('debug', "'removePresetMediaSubtitle, new: '" + mediaSubtitle.substring(0, mediaSubtitle.length()-10) )
         return mediaSubtitle.substring(0, mediaSubtitle.length()-10) //remove substr[0, length-presetN] ' - Preset N'
     }
     removeTrackData(['preset'])
@@ -296,7 +291,7 @@ def getPresetNumber(mediaSubtitle) {
 def parsePresets(def excluding=7) { //was: setDefaultPresets
     logger('debug', "parsePresets() excluding: " + excluding)
     if( !getDataValue("presetObject") ) { setDefaultPresetObject() }
-    
+
     try {
         JSONObject testPresets = new JSONObject( getDataValue("presetObject") )
         if(testPresets.length()<5) {setDefaultPresetObject()}
@@ -304,9 +299,9 @@ def parsePresets(def excluding=7) { //was: setDefaultPresets
         logger('debug', "parsePresets() cannot parse JSON testPresets exception: " + e)
         setDefaultPresetObject()
     }
-    
+
     JSONObject presets = new JSONObject( getDataValue("presetObject") )
-    
+
     for(int i=0; i<presets.length(); i++) {
         if( ((i+1)+"") != (excluding+"") ) {
             def key = "preset"+(i+1)
@@ -338,10 +333,10 @@ def setDefaultPresetObject() {
 
 def playPreset(number) {
     def preset = getPresetObject(number)
-    
+
     if (preset) {
         setMediaPlaybacks( preset.toString() )
-    }   
+    }
 }
 
 def getPresetObject(number) {
@@ -352,7 +347,7 @@ def getPresetObject(number) {
     if(presets.get(key).mediaTitle) {
         logger('debug', "getPresetObject() is old preset object")
         presets[key].put( "mediaSubtitle", (presets[key]["mediaSubtitle"]+" - Preset "+number) )
-   
+
         if( presets.get(key).mediaTitle.equals(defaultMediaTitle) ) {
             logger('debug', "'getPresetObject' key: "+key+", is default!")
             return null
@@ -369,7 +364,7 @@ def getPresetObject(number) {
             return null
         }
     }
-    
+
     return presets.get(key)
 }
 
@@ -404,7 +399,7 @@ def preset2() {
 
 def preset3() {
     logger('debug', "Executing 'preset3': ")
-    playPreset(3)    
+    playPreset(3)
 }
 
 def preset4() {
@@ -443,7 +438,7 @@ def speak(phrase, resume = false) {
 //AUDIO NOTIFICATION, TEXT
 def playText(message, level = 0, resume = false) {
     logger('info', "playText, message: " + message + " level: " + level)
-    
+
     if (level!=0&&level!=null) { setLevel(level) }
     return speak(message, true)
 }
@@ -461,7 +456,7 @@ def playTextAndRestore(message, level = 0, thirdValue = 0) {
 
 def playTrackAtVolume(trackToPlay, level = 0) {
     logger('info', "playTrackAtVolume" + trackToPlay)
-    
+
     def url = "" + trackToPlay;
     return playTrack(url, level)
 }
@@ -470,7 +465,7 @@ def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false)
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level + " resume: " + resume)
 
     if (level!=0&&level!=null) { setLevel(level) }
-    
+
     def data = '{ "mediaType":"audio/mp3", "mediaUrl":"'+uri+'", "mediaStreamType":"BUFFERED", "mediaTitle":"SmartThings", "mediaSubtitle":"SmartThings playback", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300"}'
     if(googleTTS) {
         data = '{ "mediaType":"audio/mp3", "mediaUrl":"", "mediaStreamType":"BUFFERED", "mediaTitle":"'+uri+'", "mediaSubtitle":"SmartThings notification", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300", "googleTTS":"'+googleTTS+'"}'
@@ -484,7 +479,7 @@ def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false)
         if(number > 0) {
             preset = getPresetObject(number)
         }
-    
+
         if (preset) {
             preset.each {
                 data = data + ', '+it.toString()
@@ -521,7 +516,7 @@ def playTrackAndRestore(String uri, String duration, level = 0) {
 
 def generateTrackDescription() {
     def trackDescription = getTrackData(["title"])[0] + "\n" + getTrackData(["application"])[0] + "\n" + removePresetMediaSubtitle(getTrackData(["subtitle"])[0])
-    
+
     logger('debug', "Executing 'generateTrackDescription', trackDescription: "+ trackDescription)
     sendEvent(name: "trackDescription", value: trackDescription, displayed:false)
 }
@@ -530,7 +525,7 @@ def setTrackData(newTrackData) {
     JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     logger('debug', "setTrackData() currentTrackData: "+currentTrackData+", newTrackData: "+newTrackData)
     def changed = false
-    
+
     newTrackData.each { key, value ->
         if(key=='connection'||key=='volume'||key=='muted'||key=='application'||key=='status'||key=='title'||key=='subtitle'||key=='image'||key=='preset'||key=='groupPlayback') {
             if(currentTrackData.has(key)) {
@@ -573,7 +568,7 @@ def setTrackData(newTrackData) {
             }
         }
     }
-    
+
     if(changed){
         logger('debug', "sendEvent trackdata, currentTrackData: "+currentTrackData)
         sendEvent(name: "trackData", value: currentTrackData, displayed:false)
@@ -584,15 +579,15 @@ def getTrackData(keys) {
     def returnValues = []
     logger('debug', "getTrackData, keys: "+keys)
     JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
-    
+
     keys.each {
         def defaultValue = null
         if( it.equals('title') || it.equals('subtitle') ) { defaultValue="--" }
         if( it.equals('application') ) { defaultValue="Ready to cast" }
-        
+
         returnValues.add( trackData.optString(it, defaultValue) ?: defaultValue )
     }
-    
+
     return returnValues
 }
 
@@ -600,7 +595,7 @@ def removeTrackData(keys) {
     JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     keys.each{
         if( trackData.has( it ) ) {
-            if( it.equals('preset') ) { 
+            if( it.equals('preset') ) {
                 logger('debug', 'removeTrackData, resetPresetName for: ' + getTrackData(['preset'])[0])
                 parsePresets()
             }
@@ -633,7 +628,7 @@ def apiCall(String path, def dev, def media=null) {
         sendHttpPost(getDataValue('apiHost'), path, media)
         return
     }
-    sendHttpRequest(getDataValue('apiHost'), path)  
+    sendHttpRequest(getDataValue('apiHost'), path)
 }
 
 def sendHttpRequest(String host, String path, def defaultCallback=hubResponseReceived) {
@@ -654,7 +649,7 @@ void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
 
 // HELPERS
 def getTimeStamp() {
-    Date now = new Date(); 
+    Date now = new Date();
     def timeStamp = (long)(now.getTime()/1000)
     logger('info', "Timestamp generated: "+timeStamp)
     return timeStamp;
@@ -689,7 +684,7 @@ def getLatestVersion() {
             logger('debug', "response status: ${resp.status}")
             String data = "${resp.getData()}"
             logger('debug', "data: ${data}")
-            
+
             if(resp.status==200 && data!=null) {
                 return parseJson(data)
             } else {
