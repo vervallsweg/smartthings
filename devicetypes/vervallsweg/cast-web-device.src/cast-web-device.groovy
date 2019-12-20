@@ -16,16 +16,23 @@
 import org.json.JSONObject
 
 preferences {
-	section {
-        input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 0, required: false, displayDuringSetup: false)
-        input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 1, required: false, displayDuringSetup: false)
-        input("configNext", "enum", title: "Next song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
-        input("configPrev", "enum", title: "Previous song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
-        input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?", description: "Tap to set", options: ["1","2","3","4","5","6"], defaultValue: "", required: false, displayDuringSetup: false)
-        input("configLoglevel", "enum", title: "Log level?", description: "Tap to set", options: ["1","2","3","4"], defaultValue: "", required: false, displayDuringSetup: false)
-        input("googleTTS", "bool", title: "Use Google's TTS voice?", description: "Tap to set", required: false, displayDuringSetup: false)
-        input("googleTTSLanguage", "enum", title: "Google TTS language?", description: "Tap to set", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"], defaultValue: "", required: false, displayDuringSetup: false)
-    }
+	section("Media preferences") {
+		input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 0, required: false, displayDuringSetup: false)
+		input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 1, required: false, displayDuringSetup: false)
+		input("configNext", "enum", title: "Next song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configPrev", "enum", title: "Previous song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?", description: "Tap to set", options: ["1","2","3","4","5","6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configLoglevel", "enum", title: "Log level?", description: "Tap to set", options: ["1","2","3","4"], defaultValue: "", required: false, displayDuringSetup: false)
+	}
+
+	section("Speech preferences") {
+	   input("googleTTS", "bool", title: "Use Google's TTS voice?", description: "Tap to set", required: false, displayDuringSetup: false)
+		input("googleTTSLanguage", "enum", title: "Google TTS language?", description: "Tap to set", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"], defaultValue: "", required: false, displayDuringSetup: false)
+	}
+
+	section("Advanced") {
+		input("refreshOnNextAction", "bool", title: "Refresh on button press/action?", description: "Tap to set", required: false, displayDuringSetup: false)
+	}
 }
 
 metadata {
@@ -173,6 +180,7 @@ def updated() {
 }
 
 def refresh() {
+	subscribe()
     apiCall('/', true);
 }
 
@@ -205,32 +213,31 @@ def parse(String description) {
 def play() {
     logger('debug', "Executing 'play'")
     apiCall('/play', true)
-    refresh()
+	refreshOnNextAction()
 }
 
 def pause() {
     logger('debug', "Executing 'pause'")
     apiCall('/pause', true)
-    refresh()
+	refreshOnNextAction()
 }
 
 def stop() {
     logger('debug', "Executing 'stop'")
     apiCall('/stop', true)
-    refresh()
+	refreshOnNextAction()
 }
 
 def nextTrack() {
     logger('debug', "Executing 'nextTrack' encode: ")
     selectableAction(settings.configNext)
-    refresh()
+	refreshOnNextAction()
 }
 
 def previousTrack() {
     logger('debug', "Executing 'previousTrack'")
     selectableAction(settings.configPrev)
-    refresh()
-
+	refreshOnNextAction()
 }
 
 def setLevel(level) {
@@ -245,19 +252,19 @@ def setLevel(level) {
         return
     }
     apiCall('/volume/'+lvl, true)
-	refresh()
+	refreshOnNextAction()
 }
 
 def mute() {
     logger('debug', "Executing 'mute'")
     apiCall('/muted/true', true)
-    refresh()
+	refreshOnNextAction()
 }
 
 def unmute() {
     logger('debug', "Executing 'unmute'")
     apiCall('/muted/false', true)
-    refresh()
+	refreshOnNextAction()
 }
 
 def setTrack(trackToSet) {
@@ -429,11 +436,13 @@ def preset6() {
 def on() {
     logger('debug', "Executing 'on'")
     selectableAction(settings.configOn)
+	refresh()
 }
 
 def off() {
     logger('debug', "Executing 'off'")
     selectableAction(settings.configOff ?: 'Stop')
+	refresh()
 }
 
 def speak(phrase, resume = false) {
@@ -586,7 +595,6 @@ def setTrackData(newTrackData) {
                     sendEvent(name: "switch", value: off, displayed: false)
                 }
 
-                logger('debug', "Speaker state is: " + statusText(currentTrackData.get('status')))
             }
 
 
@@ -688,6 +696,8 @@ def apiCall(String path, def dev, def media=null) {
     if ( path.contains('subscribe') ) {
         def hub = location.hubs[0]
         path = path + '/' + hub.localIP + ':' + hub.localSrvPortTCP
+		sendHttpRequest(getDataValue('apiHost'), path)
+		return
     }
 
     if (media) {
@@ -788,6 +798,26 @@ private statusText(status) {
 		default:
 			return "stopped"
 	}
+}
+
+//Refresh data funcs
+def subscribe() {
+	//Subscribe to speaker
+	log.trace "Subscribing to speaker"
+	apiCall("/subscribe", true)
+	settings.subOnNextAction = false
+
+}
+
+def refreshOnNextAction(){
+	if (settings.refreshOnNextAction ?: false) {
+		log.debug "Refresh on action called"
+		refresh()
+	}
+}
+
+private delayAction(long time) {
+	new physicalgraph.device.HubAction("delay $time")
 }
 
 //DEBUGGING
