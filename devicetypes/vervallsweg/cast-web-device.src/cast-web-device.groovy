@@ -16,23 +16,25 @@
 import org.json.JSONObject
 
 preferences {
-    input("configOn", "enum", title: "Switch on does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configOff", "enum", title: "Switch off does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configNext", "enum", title: "Next song does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Next preset","Previous preset","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configPrev", "enum", title: "Previous song does?",
-        required: false, multiple:false, value: "nothing", options: ["Play","Pause","Stop","Next preset","Previous preset","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"])
-    input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?",
-        required: false, multiple:false, value: "nothing", options: ["1","2","3","4","5","6"])
-    input("configLoglevel", "enum", title: "Log level?",
-        required: false, multiple:false, value: "nothing", options: ["0","1","2","3","4"])
-    input("googleTTS", "bool", title: "Use Google's TTS voice?", required: false)
-    input("googleTTSLanguage", "enum", title: "Google TTS language?",
-        required: false, multiple:false, value: "nothing", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"])
+	section("Media preferences") {
+		input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 0, required: false, displayDuringSetup: false)
+		input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 1, required: false, displayDuringSetup: false)
+		input("configNext", "enum", title: "Next song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configPrev", "enum", title: "Previous song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?", description: "Tap to set", options: ["1","2","3","4","5","6"], defaultValue: "", required: false, displayDuringSetup: false)
+		input("configLoglevel", "enum", title: "Log level?", description: "Tap to set", options: ["1","2","3","4"], defaultValue: "", required: false, displayDuringSetup: false)
+	}
+
+	section("Speech preferences") {
+	   input("googleTTS", "bool", title: "Use Google's TTS voice?", description: "Tap to set", required: false, displayDuringSetup: false)
+		input("googleTTSLanguage", "enum", title: "Google TTS language?", description: "Tap to set", options: ["cs-CZ","da-DK","de-DE","en-AU","en-CA","en-GH","en-GB","en-IN","en-IE","en-KE","en-NZ","en-NG","en-PH","en-ZA","en-TZ","en-US","es-AR","es-BO","es-CL","es-CO","es-CR","es-EC","es-SV","es-ES","es-US","es-GT","es-HN","es-MX","es-PA","es-PY","es-PE","es-PR","es-DO","es-UY","es-VE","eu-ES","fr-CA","fr-FR","it-IT","lt-LT","hu-HU","nl-NL","nb-NO","pl-P","pt-BR","pt-PT","ro-RO","sk-SK","sl-SI","fi-FI","sv-SE","ta-IN","vi-VN","tr-TR","el-GR","bg-BG","ru-RU","sr-RS","he-IL","ar-AE","fa-IR","hi-IN","th-TH","ko-KR","cmn-Hant-TW","yue-Hant-HK","ja-JP","cmn-Hans-HK","cmn-Hans-CN"], defaultValue: "", required: false, displayDuringSetup: false)
+	}
+
+	section("Advanced") {
+		input("refreshOnNextAction", "bool", title: "Refresh on button press/action?", description: "Tap to set", required: false, displayDuringSetup: false)
+	}
 }
- 
+
 metadata {
     definition (name: "cast-web-device", namespace: "vervallsweg", author: "Tobias Haerke") {
         capability "Actuator"
@@ -43,6 +45,7 @@ metadata {
         capability "Speech Synthesis"
         capability "Switch"
         //capability "Health Check" //TODO: Implement health check
+		capability "Sensor"
 
         command "checkForUpdate"
         command "preset1"
@@ -95,50 +98,50 @@ metadata {
                 attributeState("trackDescription", label:"${currentValue}", defaultState: true)
             }
         }
-        
-        standardTile("updateDeviceStatus", "device.connection", width: 2, height: 2, decoration: "flat") {
+
+		standardTile("updateDeviceStatus", "device.connection", width: 2, height: 2, decoration: "flat") {
             state "val", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#ffffff", defaultState: true
             state "disconnected", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#e86d13", defaultState: false
         }
-        
+
         standardTile("stop", "device", width: 2, height: 2, decoration: "flat") {
             state "val", label: '', action: "music Player.stop", icon: "st.sonos.stop-btn", backgroundColor: "#ffffff", defaultState: true
         }
-        
+
         valueTile("updateStatus", "device.updateStatus", width: 2, height: 2) {
             state "val", label:'${currentValue}', defaultState: true, action: "checkForUpdate"
         }
-        
+
         standardTile("preset1", "device.preset1Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset1', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset1', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset2", "device.preset2Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset2', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset2', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset3", "device.preset3Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset3', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset3', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset4", "device.preset4Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset4', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset4', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset5", "device.preset5Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset5', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset5', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         standardTile("preset6", "device.preset6Name", width: 2, height: 1, decoration: "flat") {
             state "val", label:'${currentValue}', action:'preset6', defaultState: true
             state "Playing", label:'-\n ${currentValue} \n-', action:'preset6', backgroundColor: "#00a0dc", defaultState: false
         }
-        
+
         main "mediaMulti"
         details(["mediaMulti",
                 "updateDeviceStatus",
@@ -158,7 +161,7 @@ metadata {
 def installed() {
     logger('debug', "Executing 'installed'")
     log.debug "installed"
-    
+
     //Preset, update-status tiles
     refresh()
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
@@ -169,7 +172,7 @@ def installed() {
 def updated() {
     logger('debug', "Executing 'updated'")
     log.debug "updated"
-    
+
     //Preset, update-status tiles
     refresh()
     sendEvent(name: "updateStatus", value: ("Version "+getThisVersion() + "\nClick to check for updates"), displayed: false)
@@ -177,21 +180,20 @@ def updated() {
 }
 
 def refresh() {
+	subscribe()
     apiCall('/', true);
 }
 
 // parse events into attributes
 def parse(String description) {
     try {
-        logger('debug', "'parse', parsing: '${description}'")
         def msg = parseLanMessage(description)
         logger('debug', 'parse, msg.json: ' + msg.json)
-        
+
         if(msg.json!=null){
             if(!msg.json.response) {
                 if(msg.json.status) {
                     setTrackData(msg.json.status)
-                    generateTrackDescription()
                 }
                 if(msg.json.connection) {
                     logger('debug', "msg.json.connection: "+msg.json.connection)
@@ -199,6 +201,7 @@ def parse(String description) {
                 }
             } else if( !msg.json.response.equals('ok') ) {
                 logger('error', "json response not ok: " + msg.json)
+                refresh()
             }
         }
     } catch (e) {
@@ -209,27 +212,32 @@ def parse(String description) {
 // handle commands
 def play() {
     logger('debug', "Executing 'play'")
-    apiCall('/play', true);
+    apiCall('/play', true)
+	refreshOnNextAction()
 }
 
 def pause() {
     logger('debug', "Executing 'pause'")
-    apiCall('/pause', true);
+    apiCall('/pause', true)
+	refreshOnNextAction()
 }
 
 def stop() {
     logger('debug', "Executing 'stop'")
-    apiCall('/stop', true);
+    apiCall('/stop', true)
+	refreshOnNextAction()
 }
 
 def nextTrack() {
     logger('debug', "Executing 'nextTrack' encode: ")
     selectableAction(settings.configNext)
+	refreshOnNextAction()
 }
 
 def previousTrack() {
     logger('debug', "Executing 'previousTrack'")
     selectableAction(settings.configPrev)
+	refreshOnNextAction()
 }
 
 def setLevel(level) {
@@ -244,16 +252,19 @@ def setLevel(level) {
         return
     }
     apiCall('/volume/'+lvl, true)
+	refreshOnNextAction()
 }
 
 def mute() {
     logger('debug', "Executing 'mute'")
     apiCall('/muted/true', true)
+	refreshOnNextAction()
 }
 
 def unmute() {
     logger('debug', "Executing 'unmute'")
     apiCall('/muted/false', true)
+	refreshOnNextAction()
 }
 
 def setTrack(trackToSet) {
@@ -274,7 +285,7 @@ def restoreTrack(trackToSet) {
 def removePresetMediaSubtitle(mediaSubtitle) {
     if( isPreset(mediaSubtitle) ) {
         setTrackData( ["preset":getPresetNumber(mediaSubtitle)] )
-        logger('debug', "'removePresetMediaSubtitle, new: '" + mediaSubtitle.substring(0, mediaSubtitle.length()-10) ) 
+        logger('debug', "'removePresetMediaSubtitle, new: '" + mediaSubtitle.substring(0, mediaSubtitle.length()-10) )
         return mediaSubtitle.substring(0, mediaSubtitle.length()-10) //remove substr[0, length-presetN] ' - Preset N'
     }
     removeTrackData(['preset'])
@@ -296,7 +307,7 @@ def getPresetNumber(mediaSubtitle) {
 def parsePresets(def excluding=7) { //was: setDefaultPresets
     logger('debug', "parsePresets() excluding: " + excluding)
     if( !getDataValue("presetObject") ) { setDefaultPresetObject() }
-    
+
     try {
         JSONObject testPresets = new JSONObject( getDataValue("presetObject") )
         if(testPresets.length()<5) {setDefaultPresetObject()}
@@ -304,9 +315,9 @@ def parsePresets(def excluding=7) { //was: setDefaultPresets
         logger('debug', "parsePresets() cannot parse JSON testPresets exception: " + e)
         setDefaultPresetObject()
     }
-    
+
     JSONObject presets = new JSONObject( getDataValue("presetObject") )
-    
+
     for(int i=0; i<presets.length(); i++) {
         if( ((i+1)+"") != (excluding+"") ) {
             def key = "preset"+(i+1)
@@ -338,10 +349,10 @@ def setDefaultPresetObject() {
 
 def playPreset(number) {
     def preset = getPresetObject(number)
-    
+
     if (preset) {
         setMediaPlaybacks( preset.toString() )
-    }   
+    }
 }
 
 def getPresetObject(number) {
@@ -352,7 +363,7 @@ def getPresetObject(number) {
     if(presets.get(key).mediaTitle) {
         logger('debug', "getPresetObject() is old preset object")
         presets[key].put( "mediaSubtitle", (presets[key]["mediaSubtitle"]+" - Preset "+number) )
-   
+
         if( presets.get(key).mediaTitle.equals(defaultMediaTitle) ) {
             logger('debug', "'getPresetObject' key: "+key+", is default!")
             return null
@@ -369,7 +380,7 @@ def getPresetObject(number) {
             return null
         }
     }
-    
+
     return presets.get(key)
 }
 
@@ -404,7 +415,7 @@ def preset2() {
 
 def preset3() {
     logger('debug', "Executing 'preset3': ")
-    playPreset(3)    
+    playPreset(3)
 }
 
 def preset4() {
@@ -425,11 +436,13 @@ def preset6() {
 def on() {
     logger('debug', "Executing 'on'")
     selectableAction(settings.configOn)
+	refresh()
 }
 
 def off() {
     logger('debug', "Executing 'off'")
     selectableAction(settings.configOff ?: 'Stop')
+	refresh()
 }
 
 def speak(phrase, resume = false) {
@@ -440,10 +453,11 @@ def speak(phrase, resume = false) {
     }
     return playTrack( textToSpeech(phrase, true).uri, 0, 0, true )
 }
+
 //AUDIO NOTIFICATION, TEXT
 def playText(message, level = 0, resume = false) {
     logger('info', "playText, message: " + message + " level: " + level)
-    
+
     if (level!=0&&level!=null) { setLevel(level) }
     return speak(message, true)
 }
@@ -461,16 +475,17 @@ def playTextAndRestore(message, level = 0, thirdValue = 0) {
 
 def playTrackAtVolume(trackToPlay, level = 0) {
     logger('info', "playTrackAtVolume" + trackToPlay)
-    
+
     def url = "" + trackToPlay;
     return playTrack(url, level)
 }
+
 //AUDIO NOTIFICATION, TRACK
 def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level + " resume: " + resume)
 
     if (level!=0&&level!=null) { setLevel(level) }
-    
+
     def data = '{ "mediaType":"audio/mp3", "mediaUrl":"'+uri+'", "mediaStreamType":"BUFFERED", "mediaTitle":"SmartThings", "mediaSubtitle":"SmartThings playback", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300"}'
     if(googleTTS) {
         data = '{ "mediaType":"audio/mp3", "mediaUrl":"", "mediaStreamType":"BUFFERED", "mediaTitle":"'+uri+'", "mediaSubtitle":"SmartThings notification", "mediaImageUrl":"https://lh3.googleusercontent.com/nQBLtHKqZycERjdjMGulMLMLDoPXnrZKYoJ8ijaVs8tDD6cypInQRtxgngk9SAXHkA=w300", "googleTTS":"'+googleTTS+'"}'
@@ -484,7 +499,7 @@ def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false)
         if(number > 0) {
             preset = getPresetObject(number)
         }
-    
+
         if (preset) {
             preset.each {
                 data = data + ', '+it.toString()
@@ -519,27 +534,42 @@ def playTrackAndRestore(String uri, String duration, level = 0) {
     return playTrack(uri, level, 0, true)
 }
 
-def generateTrackDescription() {
-    def trackDescription = getTrackData(["title"])[0] + "\n" + getTrackData(["application"])[0] + "\n" + removePresetMediaSubtitle(getTrackData(["subtitle"])[0])
-    
-    logger('debug', "Executing 'generateTrackDescription', trackDescription: "+ trackDescription)
-    sendEvent(name: "trackDescription", value: trackDescription, displayed:false)
-}
-
 def setTrackData(newTrackData) {
-    JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    logger('debug', "setTrackData() starting")
+    JSONObject currentTrackData;
+    try {
+         currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    } catch (e) {
+         logger('error', "Cast DTH: Unable to decode currentValue track data JSON ${e}")
+         currentTrackData = new JSONObject("{}")
+    }
+
     logger('debug', "setTrackData() currentTrackData: "+currentTrackData+", newTrackData: "+newTrackData)
     def changed = false
-    
+
     newTrackData.each { key, value ->
         if(key=='connection'||key=='volume'||key=='muted'||key=='application'||key=='status'||key=='title'||key=='subtitle'||key=='image'||key=='preset'||key=='groupPlayback') {
+            //If currentTrackData key's value matches newTrackData, then skip
             if(currentTrackData.has(key)) {
-                if(currentTrackData.get(key)==value) { return }
+                if(currentTrackData.get(key)==value) {return}
+            }
+
+            //Re-map key names and Update currentTrackData JSON with new track data
+            if ( key=="image" ) {
+                currentTrackData.put("uri", value); changed=true;
+            } else if ( key=="subtitle"){
+                currentTrackData.put("artist", value); changed=true;
+            } else if ( key=="title"){
+                currentTrackData.put("name", value); changed=true;
             }
             currentTrackData.put(key, value); changed=true;
+
+            //Set volume level
             if(currentTrackData.has('volume')) {
                 sendEvent(name: "level", value: currentTrackData.get('volume'), unit: "%", changed: true)
             }
+
+            //Set muted status
             if(currentTrackData.has('muted')) {
                 if(currentTrackData.get('muted')) {
                     sendEvent(name: "mute", value: "muted", changed: true)
@@ -547,25 +577,27 @@ def setTrackData(newTrackData) {
                     sendEvent(name: "mute", value: "unmuted", changed: true)
                 }
             }
+
+            //Set status
             if(currentTrackData.has('status')) {
-                if( currentTrackData.get('status').equals("PLAYING") || currentTrackData.get('status').equals("PAUSED") ) {
-                    if( currentTrackData.has('groupPlayback') ) {
-                        if( currentTrackData.get('groupPlayback') ) {
-                            sendEvent(name: "status", value: 'group', changed: true)
-                            sendEvent(name: "switch", value: on, displayed: false)
-                        } else {
-                            sendEvent(name: "status", value: currentTrackData.get('status').toLowerCase(), changed: true)
-                            sendEvent(name: "switch", value: on, displayed: false)
-                        }
-                    } else {
-                        sendEvent(name: "status", value: currentTrackData.get('status').toLowerCase(), changed: true)
-                        sendEvent(name: "switch", value: on, displayed: false)
-                    }
+                updateDataValue('currentStatus', currentStatus)
+
+                if( currentTrackData.get('status').equals("PLAYING") ) {
+                    sendEvent(name: "status", value: statusText(currentTrackData.get('status')), changed: true)
+                    sendEvent(name: "switch", value: on, displayed: false)
+
                 } else if( currentTrackData.get('application').equals("") || currentTrackData.get('application').equals("Backdrop") ) {
-                    sendEvent(name: "status", value: "ready", changed: true)
+                    sendEvent(name: "status", value: "stopped", changed: true)
+                    sendEvent(name: "switch", value: off, displayed: false)
+
+                } else {
+                    sendEvent(name: "status", value: statusText(currentTrackData.get('status')), changed: true)
                     sendEvent(name: "switch", value: off, displayed: false)
                 }
+
             }
+
+
             if(currentTrackData.has('preset')) {
                 logger( 'debug', "setTrackData() sendEvent presetName playing for: "+ currentTrackData.get('preset') )
                 sendEvent(name: "preset"+currentTrackData.get('preset')+"Name", value: "Playing", displayed: false, changed: true)
@@ -573,26 +605,62 @@ def setTrackData(newTrackData) {
             }
         }
     }
-    
-    if(changed){
+
+    try {
+        //Get track data
+        def trackDescription
+        def trackData =  getTrackData(["title", "application", "subtitle"])
+        def subtitle = removePresetMediaSubtitle(trackData[2])
+        def title = trackData[0]
+        def application = trackData[1]
+
+        logger('debug', trackData)
+
+        //Fix for when application is playing, but does not populate application
+        if (trackData[0] != "--" || trackData[1] != "--") {
+            trackDescription = "${subtitle} - ${title}"
+        } else {
+            trackDescription = "${subtitle} - ${title} (${application})"
+        }
+
+         sendEvent(name: "trackData",
+            value: currentTrackData,
+            descriptionText: trackDescription,
+            displayed: false,
+            isStateChange: changed
+        )
+
+        sendEvent(name: "trackDescription", value: trackDescription, descriptionText: subtitle, displayed:true)
         logger('debug', "sendEvent trackdata, currentTrackData: "+currentTrackData)
-        sendEvent(name: "trackData", value: currentTrackData, displayed:false)
+        logger('debug', "sendEvent trackDescription: "+trackDescription)
+
+
+    } catch (e) {
+              logger('error', "Cast DTH: Unable to update track data (${e})")
     }
 }
 
 def getTrackData(keys) {
     def returnValues = []
+    JSONObject trackData
+
     logger('debug', "getTrackData, keys: "+keys)
-    JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
-    
+
+    try {
+        trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    } catch (e) {
+        logger('error', "Cast DTH: Unable to decode currentValue track data JSON ${e}")
+        logger('debug', "Unable to decode: " + device.currentValue("trackData"))
+        trackData = new JSONObject("{}")
+    }
+
     keys.each {
         def defaultValue = null
-        if( it.equals('title') || it.equals('subtitle') ) { defaultValue="--" }
-        if( it.equals('application') ) { defaultValue="Ready to cast" }
-        
+        if( it.equals('title') || it.equals('subtitle') ) {defaultValue="--" }
+        if( it.equals('application') ) {defaultValue="Ready to cast"}
         returnValues.add( trackData.optString(it, defaultValue) ?: defaultValue )
     }
-    
+
     return returnValues
 }
 
@@ -600,7 +668,7 @@ def removeTrackData(keys) {
     JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
     keys.each{
         if( trackData.has( it ) ) {
-            if( it.equals('preset') ) { 
+            if( it.equals('preset') ) {
                 logger('debug', 'removeTrackData, resetPresetName for: ' + getTrackData(['preset'])[0])
                 parsePresets()
             }
@@ -628,18 +696,22 @@ def apiCall(String path, def dev, def media=null) {
     if ( path.contains('subscribe') ) {
         def hub = location.hubs[0]
         path = path + '/' + hub.localIP + ':' + hub.localSrvPortTCP
+		sendHttpRequest(getDataValue('apiHost'), path)
+		return
     }
+
     if (media) {
         sendHttpPost(getDataValue('apiHost'), path, media)
         return
     }
-    sendHttpRequest(getDataValue('apiHost'), path)  
+    sendHttpRequest(getDataValue('apiHost'), path)
 }
 
 def sendHttpRequest(String host, String path, def defaultCallback=hubResponseReceived) {
     logger('debug', "Executing 'sendHttpRequest' host: "+host+" path: "+path)
     sendHubCommand(new physicalgraph.device.HubAction("""GET ${path} HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host, [callback: defaultCallback]))
 }
+
 
 def sendHttpPost(String host, String path, def data) {
     logger('debug', "Executing 'sendHttpPost' host: "+host+" path: "+path+" data: "+data+" data.length():"+data.length()+1)
@@ -648,13 +720,14 @@ def sendHttpPost(String host, String path, def data) {
     sendHubCommand(ha)
 }
 
+
 void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
     parse(hubResponse.description)
 }
 
 // HELPERS
 def getTimeStamp() {
-    Date now = new Date(); 
+    Date now = new Date();
     def timeStamp = (long)(now.getTime()/1000)
     logger('info', "Timestamp generated: "+timeStamp)
     return timeStamp;
@@ -689,7 +762,7 @@ def getLatestVersion() {
             logger('debug', "response status: ${resp.status}")
             String data = "${resp.getData()}"
             logger('debug', "data: ${data}")
-            
+
             if(resp.status==200 && data!=null) {
                 return parseJson(data)
             } else {
@@ -712,6 +785,39 @@ def checkForUpdate() {
         logger('info', "checkForUpdate thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version)
         sendEvent(name: "updateStatus", value: ("Current: "+getThisVersion() + "\nLatest: " + getLatestVersion().version), displayed: false)
     }
+}
+
+private statusText(status) {
+	switch(status) {
+		case "PLAYING":
+			return "playing"
+		case "PAUSED":
+			return "paused"
+		case "STOPPED":
+			return "stopped"
+		default:
+			return "stopped"
+	}
+}
+
+//Refresh data funcs
+def subscribe() {
+	//Subscribe to speaker
+	log.trace "Subscribing to speaker"
+	apiCall("/subscribe", true)
+	settings.subOnNextAction = false
+
+}
+
+def refreshOnNextAction(){
+	if (settings.refreshOnNextAction ?: false) {
+		log.debug "Refresh on action called"
+		refresh()
+	}
+}
+
+private delayAction(long time) {
+	new physicalgraph.device.HubAction("delay $time")
 }
 
 //DEBUGGING
