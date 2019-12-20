@@ -16,9 +16,9 @@
 import org.json.JSONObject
 
 preferences {
-  section {
-        input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "Play", required: false, displayDuringSetup: false)
-        input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "Stop", required: false, displayDuringSetup: false)
+	section {
+        input("configOn", "enum", title: "Switch on does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 0, required: false, displayDuringSetup: false)
+        input("configOff", "enum", title: "Switch off does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: 1, required: false, displayDuringSetup: false)
         input("configNext", "enum", title: "Next song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
         input("configPrev", "enum", title: "Previous song does?", description: "Tap to set", options: ["Play","Pause","Stop","Play preset 1","Play preset 2","Play preset 3","Play preset 4","Play preset 5","Play preset 6"], defaultValue: "", required: false, displayDuringSetup: false)
         input("configResume", "enum", title: "Resume/restore (if nothing was playing before) plays preset?", description: "Tap to set", options: ["1","2","3","4","5","6"], defaultValue: "", required: false, displayDuringSetup: false)
@@ -38,6 +38,7 @@ metadata {
         capability "Speech Synthesis"
         capability "Switch"
         //capability "Health Check" //TODO: Implement health check
+		capability "Sensor"
 
         command "checkForUpdate"
         command "preset1"
@@ -91,7 +92,7 @@ metadata {
             }
         }
 
-        standardTile("updateDeviceStatus", "device.connection", width: 2, height: 2, decoration: "flat") {
+		standardTile("updateDeviceStatus", "device.connection", width: 2, height: 2, decoration: "flat") {
             state "val", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#ffffff", defaultState: true
             state "disconnected", label:'${currentValue}', action: "refresh", icon: "st.secondary.refresh-icon", backgroundColor: "#e86d13", defaultState: false
         }
@@ -178,7 +179,6 @@ def refresh() {
 // parse events into attributes
 def parse(String description) {
     try {
-        logger('debug', "'parse', parsing: '${description}'")
         def msg = parseLanMessage(description)
         logger('debug', 'parse, msg.json: ' + msg.json)
 
@@ -186,7 +186,6 @@ def parse(String description) {
             if(!msg.json.response) {
                 if(msg.json.status) {
                     setTrackData(msg.json.status)
-                    generateTrackDescription()
                 }
                 if(msg.json.connection) {
                     logger('debug', "msg.json.connection: "+msg.json.connection)
@@ -204,27 +203,33 @@ def parse(String description) {
 // handle commands
 def play() {
     logger('debug', "Executing 'play'")
-    apiCall('/play', true);
+    apiCall('/play', true)
+    refresh()
 }
 
 def pause() {
     logger('debug', "Executing 'pause'")
-    apiCall('/pause', true);
+    apiCall('/pause', true)
+    refresh()
 }
 
 def stop() {
     logger('debug', "Executing 'stop'")
-    apiCall('/stop', true);
+    apiCall('/stop', true)
+    refresh()
 }
 
 def nextTrack() {
     logger('debug', "Executing 'nextTrack' encode: ")
     selectableAction(settings.configNext)
+    refresh()
 }
 
 def previousTrack() {
     logger('debug', "Executing 'previousTrack'")
     selectableAction(settings.configPrev)
+    refresh()
+
 }
 
 def setLevel(level) {
@@ -239,16 +244,19 @@ def setLevel(level) {
         return
     }
     apiCall('/volume/'+lvl, true)
+	refresh()
 }
 
 def mute() {
     logger('debug', "Executing 'mute'")
     apiCall('/muted/true', true)
+    refresh()
 }
 
 def unmute() {
     logger('debug', "Executing 'unmute'")
     apiCall('/muted/false', true)
+    refresh()
 }
 
 def setTrack(trackToSet) {
@@ -435,6 +443,7 @@ def speak(phrase, resume = false) {
     }
     return playTrack( textToSpeech(phrase, true).uri, 0, 0, true )
 }
+
 //AUDIO NOTIFICATION, TEXT
 def playText(message, level = 0, resume = false) {
     logger('info', "playText, message: " + message + " level: " + level)
@@ -460,6 +469,7 @@ def playTrackAtVolume(trackToPlay, level = 0) {
     def url = "" + trackToPlay;
     return playTrack(url, level)
 }
+
 //AUDIO NOTIFICATION, TRACK
 def playTrack(uri, level = 0, thirdValue = 0, resume = false, googleTTS = false) {
     logger('info', "Executing 'playTrack', uri: " + uri + " level: " + level + " resume: " + resume)
@@ -514,27 +524,42 @@ def playTrackAndRestore(String uri, String duration, level = 0) {
     return playTrack(uri, level, 0, true)
 }
 
-def generateTrackDescription() {
-    def trackDescription = getTrackData(["title"])[0] + "\n" + getTrackData(["application"])[0] + "\n" + removePresetMediaSubtitle(getTrackData(["subtitle"])[0])
-
-    logger('debug', "Executing 'generateTrackDescription', trackDescription: "+ trackDescription)
-    sendEvent(name: "trackDescription", value: trackDescription, displayed:false)
-}
-
 def setTrackData(newTrackData) {
-    JSONObject currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    logger('debug', "setTrackData() starting")
+    JSONObject currentTrackData;
+    try {
+         currentTrackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    } catch (e) {
+         logger('error', "Cast DTH: Unable to decode currentValue track data JSON ${e}")
+         currentTrackData = new JSONObject("{}")
+    }
+
     logger('debug', "setTrackData() currentTrackData: "+currentTrackData+", newTrackData: "+newTrackData)
     def changed = false
 
     newTrackData.each { key, value ->
         if(key=='connection'||key=='volume'||key=='muted'||key=='application'||key=='status'||key=='title'||key=='subtitle'||key=='image'||key=='preset'||key=='groupPlayback') {
+            //If currentTrackData key's value matches newTrackData, then skip
             if(currentTrackData.has(key)) {
-                if(currentTrackData.get(key)==value) { return }
+                if(currentTrackData.get(key)==value) {return}
+            }
+
+            //Re-map key names and Update currentTrackData JSON with new track data
+            if ( key=="image" ) {
+                currentTrackData.put("uri", value); changed=true;
+            } else if ( key=="subtitle"){
+                currentTrackData.put("artist", value); changed=true;
+            } else if ( key=="title"){
+                currentTrackData.put("name", value); changed=true;
             }
             currentTrackData.put(key, value); changed=true;
+
+            //Set volume level
             if(currentTrackData.has('volume')) {
                 sendEvent(name: "level", value: currentTrackData.get('volume'), unit: "%", changed: true)
             }
+
+            //Set muted status
             if(currentTrackData.has('muted')) {
                 if(currentTrackData.get('muted')) {
                     sendEvent(name: "mute", value: "muted", changed: true)
@@ -542,7 +567,11 @@ def setTrackData(newTrackData) {
                     sendEvent(name: "mute", value: "unmuted", changed: true)
                 }
             }
+
+            //Set status
             if(currentTrackData.has('status')) {
+                updateDataValue('currentStatus', currentStatus)
+
                 if( currentTrackData.get('status').equals("PLAYING") || currentTrackData.get('status').equals("PAUSED") ) {
                     if( currentTrackData.has('groupPlayback') ) {
                         if( currentTrackData.get('groupPlayback') ) {
@@ -556,11 +585,14 @@ def setTrackData(newTrackData) {
                         sendEvent(name: "status", value: currentTrackData.get('status').toLowerCase(), changed: true)
                         sendEvent(name: "switch", value: on, displayed: false)
                     }
+
                 } else if( currentTrackData.get('application').equals("") || currentTrackData.get('application').equals("Backdrop") ) {
                     sendEvent(name: "status", value: "ready", changed: true)
                     sendEvent(name: "switch", value: off, displayed: false)
                 }
             }
+
+
             if(currentTrackData.has('preset')) {
                 logger( 'debug', "setTrackData() sendEvent presetName playing for: "+ currentTrackData.get('preset') )
                 sendEvent(name: "preset"+currentTrackData.get('preset')+"Name", value: "Playing", displayed: false, changed: true)
@@ -569,22 +601,60 @@ def setTrackData(newTrackData) {
         }
     }
 
-    if(changed){
+    try {
+        //Get track data
+        def trackDescription
+        def trackData =  getTrackData(["title", "application", "subtitle"])
+        def subtitle = removePresetMediaSubtitle(trackData[2])
+        def title = trackData[0]
+        def application = trackData[1]
+
+        logger('debug', trackData)
+
+        //Fix for when application is playing, but does not populate application
+        if (trackData[0] != "--" || trackData[1] != "--") {
+            trackDescription = "${subtitle} - ${title}"
+        } else {
+            trackDescription = "${subtitle} - ${title} (${application})"
+        }
+
+         sendEvent(name: "trackData",
+            value: currentTrackData,
+            descriptionText: trackDescription,
+            displayed: false,
+            isStateChange: changed
+        )
+
+        sendEvent(name: "trackDescription", value: trackDescription, descriptionText: subtitle, displayed:true)
         logger('debug', "sendEvent trackdata, currentTrackData: "+currentTrackData)
-        sendEvent(name: "trackData", value: currentTrackData, displayed:false)
+        logger('debug', "sendEvent trackDescription: "+trackDescription)
+
+
+    } catch (e) {
+              logger('error', "Cast DTH: Unable to update track data (${e})")
     }
+
+
 }
 
 def getTrackData(keys) {
     def returnValues = []
+    JSONObject trackData
+
     logger('debug', "getTrackData, keys: "+keys)
-    JSONObject trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+
+    try {
+        trackData = new JSONObject( device.currentValue("trackData") ?: "{}" )
+    } catch (e) {
+        logger('error', "Cast DTH: Unable to decode currentValue track data JSON ${e}")
+        logger('debug', "Unable to decode: " + device.currentValue("trackData"))
+        trackData = new JSONObject("{}")
+    }
 
     keys.each {
         def defaultValue = null
-        if( it.equals('title') || it.equals('subtitle') ) { defaultValue="--" }
-        if( it.equals('application') ) { defaultValue="Ready to cast" }
-
+        if( it.equals('title') || it.equals('subtitle') ) {defaultValue="--" }
+        if( it.equals('application') ) {defaultValue="Ready to cast"}
         returnValues.add( trackData.optString(it, defaultValue) ?: defaultValue )
     }
 
@@ -624,6 +694,7 @@ def apiCall(String path, def dev, def media=null) {
         def hub = location.hubs[0]
         path = path + '/' + hub.localIP + ':' + hub.localSrvPortTCP
     }
+
     if (media) {
         sendHttpPost(getDataValue('apiHost'), path, media)
         return
@@ -636,12 +707,14 @@ def sendHttpRequest(String host, String path, def defaultCallback=hubResponseRec
     sendHubCommand(new physicalgraph.device.HubAction("""GET ${path} HTTP/1.1\r\nHOST: $host\r\n\r\n""", physicalgraph.device.Protocol.LAN, host, [callback: defaultCallback]))
 }
 
+
 def sendHttpPost(String host, String path, def data) {
     logger('debug', "Executing 'sendHttpPost' host: "+host+" path: "+path+" data: "+data+" data.length():"+data.length()+1)
     def ha = new physicalgraph.device.HubAction("""POST ${path} HTTP/1.1\r\nHOST: $host\r\nContent-Type: application/json\r\nContent-Length:${data.length()+1}\r\n\r\n ${data}""", physicalgraph.device.Protocol.LAN, host, [callback: hubResponseReceived])
     logger('debug', "HubAction: "+ha)
     sendHubCommand(ha)
 }
+
 
 void hubResponseReceived(physicalgraph.device.HubResponse hubResponse) {
     parse(hubResponse.description)
