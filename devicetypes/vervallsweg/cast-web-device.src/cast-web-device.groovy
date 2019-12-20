@@ -193,6 +193,7 @@ def parse(String description) {
                 }
             } else if( !msg.json.response.equals('ok') ) {
                 logger('error', "json response not ok: " + msg.json)
+                refresh()
             }
         }
     } catch (e) {
@@ -572,24 +573,20 @@ def setTrackData(newTrackData) {
             if(currentTrackData.has('status')) {
                 updateDataValue('currentStatus', currentStatus)
 
-                if( currentTrackData.get('status').equals("PLAYING") || currentTrackData.get('status').equals("PAUSED") ) {
-                    if( currentTrackData.has('groupPlayback') ) {
-                        if( currentTrackData.get('groupPlayback') ) {
-                            sendEvent(name: "status", value: 'group', changed: true)
-                            sendEvent(name: "switch", value: on, displayed: false)
-                        } else {
-                            sendEvent(name: "status", value: currentTrackData.get('status').toLowerCase(), changed: true)
-                            sendEvent(name: "switch", value: on, displayed: false)
-                        }
-                    } else {
-                        sendEvent(name: "status", value: currentTrackData.get('status').toLowerCase(), changed: true)
-                        sendEvent(name: "switch", value: on, displayed: false)
-                    }
+                if( currentTrackData.get('status').equals("PLAYING") ) {
+                    sendEvent(name: "status", value: statusText(currentTrackData.get('status')), changed: true)
+                    sendEvent(name: "switch", value: on, displayed: false)
 
                 } else if( currentTrackData.get('application').equals("") || currentTrackData.get('application').equals("Backdrop") ) {
-                    sendEvent(name: "status", value: "ready", changed: true)
+                    sendEvent(name: "status", value: "stopped", changed: true)
+                    sendEvent(name: "switch", value: off, displayed: false)
+
+                } else {
+                    sendEvent(name: "status", value: statusText(currentTrackData.get('status')), changed: true)
                     sendEvent(name: "switch", value: off, displayed: false)
                 }
+
+                logger('debug', "Speaker state is: " + statusText(currentTrackData.get('status')))
             }
 
 
@@ -633,8 +630,6 @@ def setTrackData(newTrackData) {
     } catch (e) {
               logger('error', "Cast DTH: Unable to update track data (${e})")
     }
-
-
 }
 
 def getTrackData(keys) {
@@ -780,6 +775,19 @@ def checkForUpdate() {
         logger('info', "checkForUpdate thisVersion: " + getThisVersion() + ", latestVersion: " + getLatestVersion().version)
         sendEvent(name: "updateStatus", value: ("Current: "+getThisVersion() + "\nLatest: " + getLatestVersion().version), displayed: false)
     }
+}
+
+private statusText(status) {
+	switch(status) {
+		case "PLAYING":
+			return "playing"
+		case "PAUSED":
+			return "paused"
+		case "STOPPED":
+			return "stopped"
+		default:
+			return "stopped"
+	}
 }
 
 //DEBUGGING
