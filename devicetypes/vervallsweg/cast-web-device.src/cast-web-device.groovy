@@ -349,7 +349,7 @@ def getPresetObject(number) {
     def defaultMediaTitle = "Preset "+number
     logger('debug', "Executing 'playPreset': "+number+", key: "+key+", defaultMediaTitle: "+defaultMediaTitle)
     JSONObject presets = new JSONObject( getDataValue("presetObject") )
-    if(presets.get(key).mediaTitle) {
+    if(presets.get(key).is(org.json.JSONObject) && presets.get(key).mediaTitle) {
         logger('debug', "getPresetObject() is old preset object")
         presets[key].put( "mediaSubtitle", (presets[key]["mediaSubtitle"]+" - Preset "+number) )
    
@@ -361,10 +361,11 @@ def getPresetObject(number) {
         presets.put(key, newP);
     } else {
         logger('debug', "getPresetObject() is new preset object")
-        presets[key].each {
-            it.put( "mediaSubtitle", (it["mediaSubtitle"]+" - Preset "+number) )
+        def last = presets[key].length() - 1
+        for(int i in 0..last) {
+            presets[key].get(i).put( "mediaSubtitle", (presets[key].get(i)["mediaSubtitle"]+" - Preset "+number) )
         }
-        if( presets.get(key)[0].mediaTitle.equals(defaultMediaTitle) ) {
+        if( presets.get(key).get(0).mediaTitle.equals(defaultMediaTitle) ) {
             logger('debug', "'getPresetObject' key: "+key+", is default!")
             return null
         }
