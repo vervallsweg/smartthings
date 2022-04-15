@@ -40,7 +40,7 @@ def mainPage() {
     if(state.latestHttpResponse){state.latestHttpResponse = null;}
     dynamicPage(name: "mainPage", title: "Manage your Cast devices", nextPage: null, uninstall: true, install: true) {
         section("Configure web API"){
-            input "apiHostAddress", "string", title: "API host address", required: true
+            input "apiHostAddress", "text", title: "API host address", required: true
             href "updateServiceManagerPage", title: "Check for updates", description:""
             href "checkApiConnectionPage", title: "Test API connection", description:""
             href "setupGoogleAssistant",title: "Setup the Google Assistant with cast-web to broadcast messages", required: false, style: "external", url: "http://"+apiHostAddress+"/assistant/setup/", description: ""
